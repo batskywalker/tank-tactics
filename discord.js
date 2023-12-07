@@ -5,9 +5,11 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const express = require('express');
 const app = express();
 
-app.get("/", function(req, res) {
+app.use(express.static('website'));
+
+/*app.get("/", function(req, res) {
     res.sendFile(__dirname + "/website/index.html");
-});
+});*/
 
 app.listen(3000, function () {
     console.log("its runnin");
