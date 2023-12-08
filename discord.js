@@ -8,22 +8,28 @@ const hbs = require('hbs');
 
 /*app.set('view engine', 'html');
 app.engine('html', require('hbs').__express);*/
-app.use(express.static('website'));
+//app.use(express.static('website'));
 
 /*app.get("/", function(req, res) {
     res.sendFile(__dirname + "/website/index.html");
-});*/
+});
 
 app.listen(3000, function () {
     console.log("its runnin");
 });
 
-client.on("ready", () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-})
-
 app.get("/", function (req, res) {
     res.send("msg.content");
+})*/
+
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+    
+})
+
+client.on("ready", () => {
+    console.log(`Logged in as ${client.user.tag}!`);
 })
 
 client.on("messageCreate", (msg) => {
