@@ -9,9 +9,9 @@ const fs = require('fs');
 
 /*app.set('view engine', 'html');
 app.engine('html', require('hbs').__express);*/
-//app.use(express.static('website'));
+app.use(express.static('website'));
 
-/*app.get("/", function(req, res) {
+app.get("/", function(req, res) {
     res.sendFile(__dirname + "/website/index.html");
 });
 
@@ -19,13 +19,13 @@ app.listen(3000, function () {
     console.log("its runnin");
 });
 
-app.get("/", function (req, res) {
+/*app.get("/", function (req, res) {
     res.send("msg.content");
 })*/
 
 const http = require('http');
 
-const server = http.createServer((req, res) => {
+/*const server = http.createServer((req, res) => {
     fs.readFile('website/index.html', function(err, data) {
         res.writeHead(200, {
             'Content-Type': 'text/html',
@@ -34,7 +34,7 @@ const server = http.createServer((req, res) => {
         res.write(data);
         res.end();
     })
-}).listen(3000);
+}).listen(3000);*/
 
 /*server.listen(3000, () => {
     console.log('Server listening on port 3000');
@@ -45,7 +45,15 @@ client.on("ready", () => {
 });
 
 /*client.on("messageCreate", (msg) => {
-    
+    const server = http.createServer((req, res) => {
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        });
+
+        res.write(msg.content);
+    }).listen(3000)
 });*/
 
 client.login(process.env.DISCORD);
