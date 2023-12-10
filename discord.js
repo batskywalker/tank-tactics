@@ -9,7 +9,7 @@ const fs = require('fs');
 
 /*app.set('view engine', 'html');
 app.engine('html', require('hbs').__express);*/
-app.use(express.static('website'));
+/*app.use(express.static('website'));
 
 app.get("/", function(req, res) {
     res.sendFile(__dirname + "/website/index.html");
@@ -17,7 +17,7 @@ app.get("/", function(req, res) {
 
 app.listen(3000, function () {
     console.log("its runnin");
-});
+});*/
 
 /*app.get("/", function (req, res) {
     res.send("msg.content");
@@ -25,16 +25,15 @@ app.listen(3000, function () {
 
 const http = require('http');
 
-/*const server = http.createServer((req, res) => {
-    fs.readFile('website/index.html', function(err, data) {
+const server = http.createServer((req, res) => {
+    fs.readFile(`${__dirname}/website/index.html`, function(err, data) {
         res.writeHead(200, {
             'Content-Type': 'text/html',
             'Content-Length': data.length
         });
-        res.write(data);
-        res.end();
+        res.end(data);
     })
-}).listen(3000);*/
+}).listen(3000);
 
 /*server.listen(3000, () => {
     console.log('Server listening on port 3000');
