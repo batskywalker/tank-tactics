@@ -1,9 +1,10 @@
-/*window.onload = function() {
+window.onload = function() {
     document.getElementById("test").textContent = "This did work";
-}*/
+    const eventSource = new EventSource('/sse');
 
-/*const eventSource = new EventSource('https://localhost:3000');
+    eventSource.onmessage = event => {
+        const parent = document.querySelector("body");
+        parent.innerHTML += `${event.data}<br>`;
+    }
+}
 
-eventSource.onmessage = event => {
-    console.log(`received message from server: ${event.data}`);
-}*/
