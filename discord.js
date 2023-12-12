@@ -20,7 +20,7 @@ const server = http.createServer((req, res) => {
     else if (req.url === '/') {
         fs.readFile(`${__dirname}/website/index.html`, function(err, data) {
             res.writeHead(200, {
-                'Content-Type': 'text/html',
+                'Content-Type': 'text/html'
             });
             res.end(data);
         });
@@ -32,6 +32,14 @@ const server = http.createServer((req, res) => {
             });
             res.end(data);
         });
+    }
+    else if (req.url === '/styles.css') {
+        fs.readFile(`${__dirname}/website/styles.css`, function(err, data) {
+            res.writeHead(200, {
+                'Content-Type': 'text/css'
+            })
+            res.end(data);
+        })
     }
 }).listen(3000);
 
