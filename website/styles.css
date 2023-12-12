@@ -2,12 +2,22 @@ html {
     height: 100%;
     width: 100%;
 }
+body {
+    height: 99%;
+    width: 99%;
+}
+
+#container {
+    margin: auto;
+}
 
 table, td {
     border: 1px solid;
     border-collapse: collapse;
 }
-
+table {
+    margin: auto;
+}
 td {
     padding: 10px;
 }

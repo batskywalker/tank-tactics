@@ -5,7 +5,7 @@ window.onload = function() {
         gameBoard.appendChild(row)
         for (var j = 1; j <= 30; j++) {
             let cell = document.createElement("td");
-            cell.textContent += j;
+            cell.textContent = i + j;
             row.appendChild(cell)
         }
     }
