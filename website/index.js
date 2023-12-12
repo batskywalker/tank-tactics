@@ -7,4 +7,3 @@ window.onload = function() {
         parent.innerHTML += `${event.data}<br>`;
     }
 }
-

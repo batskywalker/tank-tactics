@@ -16,7 +16,6 @@ const server = http.createServer((req, res) => {
         });
 
         sseResponse.push(res);
-        sendData(res, 'Initial data');
     }
     else if (req.url === '/') {
         fs.readFile(`${__dirname}/website/index.html`, function(err, data) {
