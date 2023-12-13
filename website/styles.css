@@ -7,10 +7,6 @@ body {
     width: 99%;
 }
 
-#container {
-    margin: auto;
-}
-
 table, td {
     border: 1px solid;
     border-collapse: collapse;
@@ -20,4 +16,5 @@ table {
 }
 td {
     padding: 10px;
+    padding-bottom: 6px;
 }

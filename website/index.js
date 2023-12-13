@@ -5,8 +5,11 @@ window.onload = function() {
         gameBoard.appendChild(row)
         for (var j = 1; j <= 30; j++) {
             let cell = document.createElement("td");
-            cell.textContent = i + j;
             row.appendChild(cell)
+            let image = document.createElement("img");
+            image.setAttribute('height', '20px');
+            image.setAttribute('width', '20px');
+            cell.appendChild(image);
         }
     }
 
