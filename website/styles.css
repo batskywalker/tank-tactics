@@ -18,3 +18,10 @@ td {
     padding: 10px;
     padding-bottom: 6px;
 }
+
+img {
+    visibility: hidden;
+}
+img.occupied {
+    visibility: visible;
+}
