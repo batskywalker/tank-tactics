@@ -47,11 +47,7 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-function sendData(response, data) {
-    if (response) {
-        response.write(`data: ${data}\n\n`);
-    }
-}
+
 
 client.on("messageCreate", (msg) => {
     sseResponse.forEach(response => {
