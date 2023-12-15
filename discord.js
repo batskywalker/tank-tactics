@@ -1,6 +1,6 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Partials, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageComponentInteraction, InteractionCollector, ButtonComponent, InteractionResponse, Events, Collection } = require('discord.js');
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates], partials: [Partials.Channel] });
+const { Client, GatewayIntentBits, Partials, MessageComponentInteraction, InteractionCollector, InteractionResponse, Events, Collection } = require('discord.js');
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers], partials: [Partials.Channel] });
 
 const fs = require('fs');
 const http = require('http');
@@ -43,16 +43,48 @@ const server = http.createServer((req, res) => {
     }
 }).listen(4200);
 
+function sendData(response, data) {
+    if (response) {
+        response.write(`data: ${data}\n\n`);
+    }
+}
+
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
-
-
 
 client.on("messageCreate", (msg) => {
     sseResponse.forEach(response => {
         sendData(response, msg.content);
     })
+})
+
+client.on(Events.InteractionCreate, async interaction => {
+    if (interaction.isChatInputCommand()) {
+        const command = client.commands.get(interaction.commandName);
+
+        if (!command) return;
+
+        try {
+            await command.execute(interaction);
+        }
+        catch (error) {
+            console.log(error);
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({
+                    content: 'There was an error while executing this command!',
+                    ephemeral: true
+                });
+            }
+            else {
+                await interaction.reply({
+                    content: 'There was an error while executing this command!',
+                    ephemeral: true
+                });
+            }
+        }
+        return;
+    }
 });
 
 client.login(process.env.DISCORD);
