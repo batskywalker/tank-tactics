@@ -13,7 +13,7 @@ const commandFiles = fs.readdirSync(`${__dirname}\\commands\\`).filter(file => f
 for (const file of commandFiles) {
     const command = require(`${__dirname}\\commands\\${file}`);
     if ('data' in command && 'execute' in command) {
-        commands.push(command.data.toJSON());6
+        commands.push(command.data.toJSON());
     } else {
         console.log(`[WARNING] The command at ${`${__dirname}\\commands\\${file}`} is missing a required "data" or "execute" property.`);
     }

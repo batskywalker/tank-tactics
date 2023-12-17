@@ -5,6 +5,22 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const fs = require('fs');
 const http = require('http');
 
+client.commands = new Collection();
+
+const commandFiles = fs.readdirSync(`./commands/`).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+    console.log(__dirname);
+    const command = require(`./commands/${file}`);
+
+    if ('data' in command && 'execute' in command) {
+        client.commands.set(command.data.name, command);
+    }
+    else {
+        console.log(`[WARNING] the command at ./commands/ ${file} is missing a required "data" or "execute" property.`);
+    }
+}
+
 let sseResponse = [];
 
 const server = http.createServer((req, res) => {

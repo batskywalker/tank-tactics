@@ -1,6 +1,6 @@
-const {SlashCommandBuilder} = require('discord.js');sss
+const {SlashCommandBuilder} = require('discord.js');
 
-export default {
+module.exports = {
     data: new SlashCommandBuilder()
         .setName('move')
         .setDescription('Use one action point to move one space up, down, left, or right')
@@ -19,5 +19,6 @@ export default {
             player: interaction.user.id,
             move: interaction.options.getString('direction')
         }
-    }
-}
+        return moveData
+    },
+};
