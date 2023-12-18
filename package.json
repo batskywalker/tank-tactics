@@ -12,6 +12,7 @@
   },
   "author": "",
   "license": "ISC",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/batskywalker/tank-tactics/issues"
   },
@@ -23,6 +24,8 @@
     "fs": "^0.0.1-security",
     "hbs": "^4.2.0",
     "http": "^0.0.1-security",
-    "require": "^0.4.4"
+    "path": "^0.12.7",
+    "require": "^0.4.4",
+    "url": "^0.11.3"
   }
 }

@@ -1,9 +1,10 @@
-require('dotenv').config();
-const { REST, Routes } = require('discord.js');
+import 'dotenv/config';
+import { REST, Routes } from 'discord.js';
 const discord = process.env.DISCORD;
 const theClientId = process.env.CLIENTID;
 const theGuildId = process.env.GUILDID;
-const fs = require('fs');
+import fs from 'fs';
+import path from 'path';
 
 const commands = [];
 // Grab all the command files from the commands directory you created earlier

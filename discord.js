@@ -1,13 +1,21 @@
-require('dotenv').config();
-const { Client, GatewayIntentBits, Partials, MessageComponentInteraction, InteractionCollector, InteractionResponse, Events, Collection } = require('discord.js');
+import 'dotenv/config';
+import { Client, GatewayIntentBits, Partials, MessageComponentInteraction, InteractionCollector, InteractionResponse, Events, Collection } from 'discord.js';
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers], partials: [Partials.Channel] });
 
-const fs = require('fs');
-const http = require('http');
+import fs from 'fs';
+import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 client.commands = new Collection();
 
-const commandFiles = fs.readdirSync(`./commands/`).filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync(`${__dirname}\\commands\\`).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
     console.log(__dirname);
