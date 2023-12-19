@@ -5,6 +5,10 @@ const theClientId = process.env.CLIENTID;
 const theGuildId = process.env.GUILDID;
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const commands = [];
 // Grab all the command files from the commands directory you created earlier
@@ -12,9 +16,9 @@ const commands = [];
 const commandFiles = fs.readdirSync(`${__dirname}\\commands\\`).filter(file => file.endsWith('.js'));
 // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
 for (const file of commandFiles) {
-    const command = require(`${__dirname}\\commands\\${file}`);
-    if ('data' in command && 'execute' in command) {
-        commands.push(command.data.toJSON());
+    const command = await import(`file://${__dirname}\\commands\\${file}`);
+    if ('data' in command.default && 'execute' in command.default) {
+        commands.push(command.default.data.toJSON());
     } else {
         console.log(`[WARNING] The command at ${`${__dirname}\\commands\\${file}`} is missing a required "data" or "execute" property.`);
     }

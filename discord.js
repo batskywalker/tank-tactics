@@ -19,10 +19,10 @@ const commandFiles = fs.readdirSync(`${__dirname}\\commands\\`).filter(file => f
 
 for (const file of commandFiles) {
     console.log(__dirname);
-    const command = require(`./commands/${file}`);
+    const command = await import(`file://${__dirname}\\commands\\${file}`);
 
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
+    if ('data' in command.default && 'execute' in command.default) {
+        client.commands.set(command.default.data.name, command.default);
     }
     else {
         console.log(`[WARNING] the command at ./commands/ ${file} is missing a required "data" or "execute" property.`);
