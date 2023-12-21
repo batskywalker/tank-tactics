@@ -77,11 +77,7 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on("messageCreate", (msg) => {
-    sseResponse.forEach(response => {
-        sendData(response, msg.content);
-    })
-})
+var playerData = JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
 
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
@@ -90,7 +86,15 @@ client.on(Events.InteractionCreate, async interaction => {
         if (!command) return;
 
         try {
-            await command.execute(interaction);
+            playerData = JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+            const tempData = await command.execute(interaction, playerData);
+            console.log(tempData);
+
+            if (tempData) {
+                sseResponse.forEach(response => {
+                    sendData(response, tempData);
+                })
+            }
         }
         catch (error) {
             console.log(error);

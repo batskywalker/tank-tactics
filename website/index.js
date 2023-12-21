@@ -16,7 +16,6 @@ window.onload = function() {
     const eventSource = new EventSource('/sse');
 
     eventSource.onmessage = event => {
-        const parent = document.querySelector("body");
-        parent.innerHTML += `${event.data}<br>`;
+        gameBoard.innerHTML += event.data;
     }
 }

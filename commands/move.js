@@ -1,4 +1,5 @@
-import {SlashCommandBuilder} from 'discord.js'
+import {SlashCommandBuilder} from 'discord.js';
+import fs from 'fs';
 
 const data = new SlashCommandBuilder()
 .setName('move')
@@ -14,7 +15,7 @@ option.setName('direction')
     {name: 'right', value: 'right'}
 ));
 
-async function execute(interaction) {
+async function execute(interaction, playerData) {
     const moveData = {
         player: interaction.user.id,
         move: interaction.options.getString('direction')
