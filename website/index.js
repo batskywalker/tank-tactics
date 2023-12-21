@@ -16,6 +16,30 @@ window.onload = function() {
     const eventSource = new EventSource('/sse');
 
     eventSource.onmessage = event => {
-        gameBoard.innerHTML += event.data;
+        const data = JSON.parse(event.data);
+        for (var i = 0; i < data.length; i++) {
+            var x;
+            var y;
+            if (data[i].prev_pos) {
+                x = data[i].prev_pos.y;
+                y = data[i].prev_pos.x;
+            }
+            else {
+                x = data[i].pos.y;
+                y = data[i].pos.x;
+            }
+
+            if (gameBoard.children[x].children[y].children[0].classList.contains('occupied')) {
+                gameBoard.children[x].children[y].children[0].classList.remove('occupied');
+                gameBoard.children[x].children[y].children[0].removeAttribute('src');
+                gameBoard.children[x].children[y].children[0].removeAttribute('alt');
+            }
+
+            gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].classList.add('occupied');
+
+            gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].setAttribute('src', `https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}`);
+
+            gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].setAttribute('alt', data[i].playerUser);
+        }
     }
 }

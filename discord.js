@@ -67,7 +67,7 @@ const server = http.createServer((req, res) => {
     }
 }).listen(4200);
 
-function sendData(response, data) {
+async function sendData(response, data) {
     if (response) {
         response.write(`data: ${data}\n\n`);
     }
@@ -91,9 +91,9 @@ client.on(Events.InteractionCreate, async interaction => {
             console.log(tempData);
 
             if (tempData) {
-                sseResponse.forEach(response => {
-                    sendData(response, tempData);
-                })
+                for (const response of sseResponse) {
+                    await sendData(response, JSON.stringify(tempData));
+                }
             }
         }
         catch (error) {
