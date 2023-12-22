@@ -24,6 +24,23 @@ async function execute(interaction, playerData) {
         health: 3
     };
 
+    var alreadyIn = false;
+    for (var i = 1; i < playerData.length; i++) {
+        if (player.playerID == playerData[i].playerID) {
+            interaction.reply({
+                content: "You're already in the game."
+            });
+            return false;
+        }
+    }
+
+    if (playerData[0].started) {
+        interaction.reply({
+            content: 'Game has already started.'
+        });
+        return false;
+    }
+
     playerData.push(player);
 
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));

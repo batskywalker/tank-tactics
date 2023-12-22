@@ -79,6 +79,12 @@ client.on("ready", () => {
 
 var playerData = JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
 
+if (playerData[0].started) {
+    for (const response of sseResponse) {
+        await sendData(response, JSON.stringify(playerData));
+    }
+}
+
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
         const command = client.commands.get(interaction.commandName);
