@@ -14,10 +14,10 @@ option.setName('direction')
 .setDescription('The direction you want to move')
 .setRequired(true)
 .addChoices(
-    {name: 'Up', value: 'up'},
-    {name: 'Down', value: 'down'},
-    {name: 'Left', value: 'left'},
-    {name: 'Right', value: 'right'}
+    {name: 'up', value: 'up'},
+    {name: 'down', value: 'down'},
+    {name: 'left', value: 'left'},
+    {name: 'right', value: 'right'}
 ));
 
 async function execute(interaction, playerData) {
@@ -71,7 +71,7 @@ async function execute(interaction, playerData) {
             currentPlayer['prev_pos'] = previous;
 
             interaction.reply({
-                content: `<@${currentPlayer.playerID}> has moved ${directionString}`
+                content: `<@${currentPlayer.playerID}> has moved ${directionString}.`
             });
 
             return [currentPlayer];

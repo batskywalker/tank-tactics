@@ -24,7 +24,6 @@ async function execute(interaction, playerData) {
         health: 3
     };
 
-    var alreadyIn = false;
     for (var i = 1; i < playerData.length; i++) {
         if (player.playerID == playerData[i].playerID) {
             interaction.reply({

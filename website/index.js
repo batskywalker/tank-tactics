@@ -7,8 +7,8 @@ window.onload = function() {
             let cell = document.createElement("td");
             row.appendChild(cell);
             let image = document.createElement("img");
-            image.setAttribute('height', '20px');
-            image.setAttribute('width', '20px');
+            image.setAttribute('height', '40px');
+            image.setAttribute('width', '40px');
             cell.appendChild(image);
         }
     }

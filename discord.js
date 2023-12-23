@@ -29,6 +29,14 @@ for (const file of commandFiles) {
     }
 }
 
+async function sendData(response, data) {
+    if (response) {
+        response.write(`data: ${data}\n\n`);
+    }
+}
+
+var playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+
 let sseResponse = [];
 
 const server = http.createServer((req, res) => {
@@ -40,6 +48,14 @@ const server = http.createServer((req, res) => {
         });
 
         sseResponse.push(res);
+
+        (async () => {
+            if (playerData[0].started) {
+                for (const response of sseResponse) {
+                    await sendData(response, JSON.stringify(playerData));
+                }
+            }
+        })();
     }
     else if (req.url === '/') {
         fs.readFile(`${__dirname}/website/index.html`, function(err, data) {
@@ -67,17 +83,11 @@ const server = http.createServer((req, res) => {
     }
 }).listen(4200);
 
-async function sendData(response, data) {
-    if (response) {
-        response.write(`data: ${data}\n\n`);
-    }
-}
+
 
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
-
-var playerData = JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
 
 if (playerData[0].started) {
     for (const response of sseResponse) {
