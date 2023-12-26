@@ -15,6 +15,7 @@ async function execute(interaction, playerData) {
         playerID: interaction.user.id,
         playerUser: interaction.user.username,
         icon: interaction.user.avatar,
+        alive: true,
         pos: {
             x: 0,
             y: 0,
@@ -41,6 +42,7 @@ async function execute(interaction, playerData) {
     }
 
     playerData.push(player);
+    playerData[0].amount_alive += 1;
 
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 

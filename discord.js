@@ -131,4 +131,17 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+async function givePoints() {
+    if (new Date.now().getHours == 12) {
+        for (var i = 1; i < playerData.length; i++) {
+            if (playerData[i].alive) {
+                playerData[i].action += 3;
+                fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+            }
+        }
+    }
+}
+
+setTimeout(givePoints, 600000);
+
 client.login(process.env.DISCORD);

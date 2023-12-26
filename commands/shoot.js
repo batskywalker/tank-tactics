@@ -29,7 +29,14 @@ async function execute(interaction, playerData) {
         }
     }
 
-    if (currentPlayer.action > 0) {
+    if (!currentPlayer.alive) {
+        interaction.reply({
+            content: "You are dead."
+        });
+        return false;
+    }
+
+    if (currentPlayer.action <= 0) {
         interaction.reply({
             content: 'You have no more action points.'
         });
@@ -55,6 +62,12 @@ async function execute(interaction, playerData) {
         });
         return false;
     }
+    else if (!target.alive) {
+        interaction.reply({
+            content: 'That player is already dead.'
+        });
+        return false;
+    }
 
     for (var i = currentPlayer.pos.x - currentPlayer.range; i <= currentPlayer.pos.x + currentPlayer.range; i++) {
         for (var j = currentPlayer.pos.y - currentPlayer.range; j <= currentPlayer.pos.y + currentPlayer.range; j++) {
@@ -62,14 +75,32 @@ async function execute(interaction, playerData) {
                 currentPlayer.action -= 1;
                 target.health -= 1;
 
+                if (target.health <= 0) {
+                    target.alive = false;
+                    playerData[0].amount_alive -= 1;
+                    
+
+                    if (playerData[0].amount_alive == 1) {
+                        interaction.reply({
+                            content: `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n<@${currentPlayer.playerID}> HAS WON THE GAME!`
+                        });
+                    }
+                    else {
+                        interaction.reply({
+                            content: `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`
+                        });
+                    }
+                }
+                else {
+                    interaction.reply({
+                        content: `<@${currentPlayer.playerID}> has shot <@${target.playerID}>!`
+                    });
+                }
+
                 playerData[num1] = currentPlayer;
                 playerData[num2] = target;
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
-
-                interaction.reply({
-                    content: `<@${currentPlayer.playerID}> has shot <@${target.playerID}>!`
-                });
 
                 return [currentPlayer, target];
             }

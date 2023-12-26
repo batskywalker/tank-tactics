@@ -21,7 +21,39 @@ td {
 
 img {
     visibility: hidden;
+    pointer-events: none;
 }
 img.occupied {
+    visibility: visible;
+}
+
+div.player-data {
+    position: relative;
+    top: 0px;
+    left: 0px;
+}
+div.idunno {
+    font-size: 25px;
+    width: 600px;
+    color: white;
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    padding: 15px;
+    background-color: rgb(39, 39, 39);
+    border: 2px solid rgb(185, 185, 185);
+}
+div p {
+    padding-bottom: 0px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+div h2 {
+    margin-bottom: 0px;
+    margin-top: 15px;
+}
+div img.avatar{
+    float: left;
+    padding-right: 5px;
     visibility: visible;
 }

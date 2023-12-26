@@ -35,7 +35,14 @@ async function execute(interaction, playerData) {
         }
     }
 
-    if (currentPlayer.action > 0 || amount > currentPlayer.action) {
+    if (!currentPlayer.alive) {
+        interaction.reply({
+            content: "You are dead."
+        });
+        return false;
+    }
+
+    if (currentPlayer.action <= 0 || amount > currentPlayer.action) {
         interaction.reply({
             content: "You don't have enough points."
         });
@@ -58,6 +65,12 @@ async function execute(interaction, playerData) {
     else if (currentPlayer.playerID == target.playerID) {
         interaction.reply({
             content: "You can't give yourself points."
+        });
+        return false;
+    }
+    else if (!target.alive) {
+        interaction.reply({
+            content: 'That player is dead.'
         });
         return false;
     }

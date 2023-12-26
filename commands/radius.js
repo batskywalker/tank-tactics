@@ -13,6 +13,13 @@ const data = new SlashCommandBuilder()
 async function execute(interaction, playerData) {
     for (var i = 1; i < playerData.length; i++) {
         if (interaction.user.id == playerData[i].playerID) {
+            if (!playerData[i].alive) {
+                interaction.reply({
+                    content: "You are dead."
+                });
+                return false;
+            }
+            
             if (playerData[i].action > 0) {
                 playerData[i].radius += 1;
                 playerData[i].action -= 1;

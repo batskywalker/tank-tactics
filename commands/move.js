@@ -46,6 +46,13 @@ async function execute(interaction, playerData) {
             currentPlayer = playerData[i];
             num = i;
 
+            if (!currentPlayer.alive) {
+                interaction.reply({
+                    content: "You are dead."
+                });
+                return false;
+            }
+
             for (var j = 1; j < playerData.length; j++) {
                 if (currentPlayer.pos.x + direction[0] == playerData[j].pos.x && currentPlayer.pos.y + direction[1] == playerData[j].pos.y) {
                     interaction.reply({
