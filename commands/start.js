@@ -11,12 +11,28 @@ const data = new SlashCommandBuilder()
 .setDescription('Start the game.')
 
 async function execute(interaction, playerData) {
-    /*for (var i = 0; i < playerData.length; i++) {
-        playerData[i].pos.x = Math.floor(Math.random() * 30);
-        playerData[i].pos.y = Math.floor(Math.random() * 30);
-    }*/
     if (!playerData[0].started) {
         playerData[0].started = true;
+
+        for (var i = 1; i < playerData.length; i++) {
+            var occupied = false;
+            var newX = Math.floor(Math.random() * 30);
+            var newY = Math.floor(Math.random() * 30);
+
+            while (!occupied) {
+                for (var j = 1; j < playerData.length; j++) {
+                    if (newX == playerData[j].pos.x && newY == playerData[j].pos.y) {
+                        newX = Math.floor(Math.random() * 30);
+                        newY = Math.floor(Math.random() * 30);
+                    }
+                    else {
+                        occupied = true;
+                        playerData[i].pos.x = newX;
+                        playerData[i].pos.y = newY;
+                    }
+                }
+            }
+        }
 
         interaction.reply({
             content: 'Game has started!'
