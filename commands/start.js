@@ -16,14 +16,14 @@ async function execute(interaction, playerData) {
 
         for (var i = 1; i < playerData.length; i++) {
             var occupied = false;
-            var newX = Math.floor(Math.random() * 30);
-            var newY = Math.floor(Math.random() * 30);
+            var newX = Math.floor(Math.random() * playerData[0].width);
+            var newY = Math.floor(Math.random() * playerData[0].height);
 
             while (!occupied) {
                 for (var j = 1; j < playerData.length; j++) {
                     if (newX == playerData[j].pos.x && newY == playerData[j].pos.y) {
-                        newX = Math.floor(Math.random() * 30);
-                        newY = Math.floor(Math.random() * 30);
+                        newX = Math.floor(Math.random() * playerData[0].width);
+                        newY = Math.floor(Math.random() * playerData[0].height);
                     }
                     else {
                         occupied = true;

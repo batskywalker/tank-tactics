@@ -131,17 +131,32 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
+var pointsGiven = false;
+
 async function givePoints() {
-    if (new Date.now().getHours == 12) {
-        for (var i = 1; i < playerData.length; i++) {
-            if (playerData[i].alive) {
-                playerData[i].action += 3;
-                fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+    var theDate = new Date
+    console.log(theDate.getHours())
+    if (theDate.getHours() == 12) {
+        if (!pointsGiven) {
+            for (var i = 1; i < playerData.length; i++) {
+                if (playerData[i].alive) {
+                    playerData[i].action += 3;
+                    
+                }
+            }
+            pointsGiven = true;
+            fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+
+            for (const response of sseResponse) {
+                await sendData(response, JSON.stringify(playerData));
             }
         }
     }
+    else {
+        pointsGiven = false;
+    }
 }
 
-setTimeout(givePoints, 600000);
+setInterval(givePoints, 600000);
 
 client.login(process.env.DISCORD);

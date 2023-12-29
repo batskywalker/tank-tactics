@@ -7,8 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const data = new SlashCommandBuilder()
-.setName('radius')
-.setDescription('Increase the radius you can shoot in')
+.setName('range')
+.setDescription('Increase the range you can shoot in')
 
 async function execute(interaction, playerData) {
     for (var i = 1; i < playerData.length; i++) {
@@ -21,11 +21,11 @@ async function execute(interaction, playerData) {
             }
             
             if (playerData[i].action > 0) {
-                playerData[i].radius += 1;
+                playerData[i].range += 1;
                 playerData[i].action -= 1;
 
                 interaction.reply({
-                    content: `<@${playerData[i].playerID}> has increased their shooting radius.`
+                    content: `<@${playerData[i].playerID}> has increased their shooting range.`
                 });
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));

@@ -74,10 +74,20 @@ async function execute(interaction, playerData) {
         });
         return false;
     }
+    const attackDirection = [
+        [-1, 0],
+        [-1, -1],
+        [0, -1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+        [0, 1],
+        [-1, 1]
+    ];
 
-    for (var i = currentPlayer.pos.x - currentPlayer.range; i <= currentPlayer.pos.x + currentPlayer.range; i++) {
-        for (var j = currentPlayer.pos.y - currentPlayer.range; j <= currentPlayer.pos.y + currentPlayer.range; j++) {
-            if (target.pos.x == i && target.pos.y == j) {
+    for (var i = 0; i < 8; i++) {
+        for (var j = 1; j <= currentPlayer.range; j++) {
+            if (target.pos.x == currentPlayer.pos.x + (attackDirection[i][0] * j) && target.pos.y == currentPlayer.pos.y + (attackDirection[i][1] * j)) {
                 currentPlayer.action -= amount;
                 target.action += amount;
 

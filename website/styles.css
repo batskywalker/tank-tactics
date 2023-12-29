@@ -57,3 +57,16 @@ div img.avatar{
     padding-right: 5px;
     visibility: visible;
 }
+
+td.dead {
+    border-color: red;
+    background-color: rgb(84, 44, 52);
+}
+.dead img {
+    filter: grayscale(100%);
+}
+
+td.attacked {
+    border-color: red;
+    background-color: rgb(84, 44, 52);
+}
