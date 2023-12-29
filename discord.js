@@ -145,6 +145,9 @@ async function givePoints() {
                 }
             }
             pointsGiven = true;
+
+            client.channels.cache.get(process.env.CHANNELID).send('@everyone\nEveryone has received an action point!')
+
             fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
 
             for (const response of sseResponse) {

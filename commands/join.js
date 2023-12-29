@@ -44,6 +44,8 @@ async function execute(interaction, playerData) {
     playerData.push(player);
     playerData[0].amount_alive += 1;
 
+    interaction.user.roles.add('1190233509172891708');
+
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
     interaction.reply({

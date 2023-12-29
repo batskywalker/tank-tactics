@@ -97,6 +97,8 @@ async function execute(interaction, playerData) {
                         });
                     }
                     else {
+                        interaction.user.roles.remove('1190233509172891708');
+                        interaction.user.roles.add('1190234100137742386');
                         interaction.reply({
                             content: `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`
                         });

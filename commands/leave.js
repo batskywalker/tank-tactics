@@ -22,6 +22,8 @@ async function execute(interaction, playerData) {
         if (interaction.user.id == playerData[i].playerID) {
             delete playerData[i];
 
+            interaction.user.roles.remove('1190233509172891708');
+
             interaction.reply({
                 content: `<@${interaction.user.id} has left the game.`
             });
