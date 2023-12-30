@@ -134,8 +134,7 @@ client.on(Events.InteractionCreate, async interaction => {
 var pointsGiven = false;
 
 async function givePoints() {
-    var theDate = new Date
-    console.log(theDate.getHours())
+    var theDate = new Date;
     if (theDate.getHours() == 12) {
         if (!pointsGiven) {
             for (var i = 1; i < playerData.length; i++) {
