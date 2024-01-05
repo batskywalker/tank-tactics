@@ -21,6 +21,13 @@ option.setName('direction')
 ));
 
 async function execute(interaction, playerData) {
+    if (!playerData[0].started) {
+        interaction.reply({
+            content: "Actions can't be played right now."
+        });
+        return [false];
+    }
+    
     const directionString = interaction.options.getString('direction');
     var direction
 
@@ -47,18 +54,12 @@ async function execute(interaction, playerData) {
             num = i;
 
             if (!currentPlayer.alive) {
-                interaction.reply({
-                    content: "You are dead."
-                });
-                return false;
+                return [false];
             }
 
             for (var j = 1; j < playerData.length; j++) {
                 if (currentPlayer.pos.x + direction[0] == playerData[j].pos.x && currentPlayer.pos.y + direction[1] == playerData[j].pos.y) {
-                    interaction.reply({
-                        content: 'Space already occupied.'
-                    });
-                    return false;
+                    return [false];
                 }
             }
             break;
@@ -77,24 +78,14 @@ async function execute(interaction, playerData) {
 
             currentPlayer['prev_pos'] = previous;
 
-            interaction.reply({
-                content: `<@${currentPlayer.playerID}> has moved ${directionString}.`
-            });
-
-            return [currentPlayer];
+            return [`<@${currentPlayer.playerID}> has moved ${directionString}.`, currentPlayer];
         }
         else {
-            interaction.reply({
-                content: 'You have no more action points.'
-            });
-            return false;
+            return [false];
         }
     }
     else {
-        interaction.reply({
-            content: 'Not a valid space.'
-        });
-        return false;
+        return [false];
     }
 }
 

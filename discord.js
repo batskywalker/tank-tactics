@@ -7,9 +7,6 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import {createRequire} from 'module';
-const require = createRequire(import.meta.url);
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -36,6 +33,7 @@ async function sendData(response, data) {
 }
 
 var playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+var actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
 
 let sseResponse = [];
 
@@ -83,8 +81,6 @@ const server = http.createServer((req, res) => {
     }
 }).listen(4200);
 
-
-
 client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -95,52 +91,96 @@ if (playerData[0].started) {
     }
 }
 
+async function ExecuteCommand(interaction) {
+    const command = client.commands.get(interaction.commandName);
+
+    if (!command) return;
+
+    try {
+        playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+        const tempData = await command.execute(interaction, playerData);
+        playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+
+        const reply = await tempData.shift();
+
+        if (reply) {
+            client.channels.cache.get(process.env.CHANNELID).send(reply);
+        }
+
+        if (tempData) {
+            for (const response of sseResponse) {
+                await sendData(response, JSON.stringify(tempData));
+            }
+        }
+    }
+    catch (error) {
+        console.log(error);
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({
+                content: 'There was an error while executing this command!',
+                ephemeral: true
+            });
+        }
+        else {
+            await interaction.reply({
+                content: 'There was an error while executing this command!',
+                ephemeral: true
+            });
+        }
+    }
+}
+
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
-        const command = client.commands.get(interaction.commandName);
-
-        if (!command) return;
-
-        try {
-            playerData = JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
-            const tempData = await command.execute(interaction, playerData);
-            console.log(tempData);
-
-            if (tempData) {
-                for (const response of sseResponse) {
-                    await sendData(response, JSON.stringify(tempData));
+        if (playerData[0].started) {
+            var curr;
+            for (var i = 1; i < playerData.length; i++) {
+                if (playerData[i].playerID == interaction.user.id) {
+                    curr = i;
                 }
             }
-        }
-        catch (error) {
-            console.log(error);
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({
-                    content: 'There was an error while executing this command!',
-                    ephemeral: true
-                });
-            }
-            else {
+
+            if (!curr) {
                 await interaction.reply({
-                    content: 'There was an error while executing this command!',
-                    ephemeral: true
+                    content: "You're not in the game."
                 });
             }
+
+            if (!playerData[curr].alive) {
+                await interaction.reply({
+                    content: "You're dead."
+                });
+                return;
+            }
+
+            actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
+
+            if (!actionQueue[playerData[curr].queue]) {
+                tempArray = [];
+                await actionQueue.push(tempArray);
+            }
+
+            await actionQueue[playerData[curr].queue].push(interaction);
+            playerData[curr].queue += 1;
+
+            fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+            fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
         }
-        return;
+        else {
+            await ExecuteCommand(interaction);
+        }
     }
 });
 
 var pointsGiven = false;
 
-async function givePoints() {
+async function GivePoints() {
     var theDate = new Date;
     if (theDate.getHours() == 12) {
         if (!pointsGiven) {
             for (var i = 1; i < playerData.length; i++) {
                 if (playerData[i].alive) {
-                    playerData[i].action += 3;
-                    
+                    playerData[i].action += 1;
                 }
             }
             pointsGiven = true;
@@ -152,6 +192,14 @@ async function givePoints() {
             for (const response of sseResponse) {
                 await sendData(response, JSON.stringify(playerData));
             }
+
+            for (var i = 0; i < actionQueue.length; i++) {
+                for (var j = 0; j < actionQueue[i].length; j++) {
+                    await ExecuteCommand(actionQueue[i][j]);
+                }
+            }
+
+            fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, "[]");
         }
     }
     else {
@@ -159,6 +207,6 @@ async function givePoints() {
     }
 }
 
-setInterval(givePoints, 600000);
+setInterval(GivePoints, 600000);
 
 client.login(process.env.DISCORD);

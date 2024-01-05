@@ -12,10 +12,7 @@ const data = new SlashCommandBuilder()
 
 async function execute(interaction, playerData) {
     if (playerData[0].started) {
-        interaction.reply({
-            content: 'Game has already started.'
-        });
-        return false;
+        return [false];
     }
 
     for (var i = 1; i < playerData.length; i++) {
@@ -30,14 +27,14 @@ async function execute(interaction, playerData) {
 
             fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-            return false;
+            return [false];
         }
     }
 
     interaction.reply({
         content: "You're already not in the game."
     });
-    return false;
+    return [false];
 }
 
 export default {data, execute};

@@ -11,6 +11,10 @@ const data = new SlashCommandBuilder()
 .setDescription('Join the game.')
 
 async function execute(interaction, playerData) {
+    if (playerData[0].started) {
+        return [false];
+    }
+
     const player = {
         playerID: interaction.user.id,
         playerUser: interaction.user.username,
@@ -22,7 +26,8 @@ async function execute(interaction, playerData) {
         },
         range: 1,
         action: 3,
-        health: 3
+        health: 3,
+        queue: 0
     };
 
     for (var i = 1; i < playerData.length; i++) {
@@ -30,19 +35,13 @@ async function execute(interaction, playerData) {
             interaction.reply({
                 content: "You're already in the game."
             });
-            return false;
+            return [false];
         }
-    }
-
-    if (playerData[0].started) {
-        interaction.reply({
-            content: 'Game has already started.'
-        });
-        return false;
     }
 
     playerData.push(player);
     playerData[0].amount_alive += 1;
+    playerData[0].max_alive += 1;
 
     interaction.user.roles.add('1190233509172891708');
 
@@ -52,7 +51,7 @@ async function execute(interaction, playerData) {
         content: 'Thanks for joining!'
     });
 
-    return false;
+    return [false];
 }
 
 export default {data, execute};

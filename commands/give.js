@@ -21,6 +21,13 @@ option.setName('amount')
 );
 
 async function execute(interaction, playerData) {
+    if (!playerData[0].started) {
+        interaction.reply({
+            content: "Actions can't be played right now."
+        });
+        return [false];
+    }
+    
     var currentPlayer;
     var num1;
     var targetString = interaction.options.getUser('target');
@@ -36,17 +43,11 @@ async function execute(interaction, playerData) {
     }
 
     if (!currentPlayer.alive) {
-        interaction.reply({
-            content: "You are dead."
-        });
-        return false;
+        return [false];
     }
 
     if (currentPlayer.action <= 0 || amount > currentPlayer.action) {
-        interaction.reply({
-            content: "You don't have enough points."
-        });
-        return false;
+        return [false];
     }
 
     for (var i = 1; i < playerData.length; i++) {
@@ -57,22 +58,13 @@ async function execute(interaction, playerData) {
     }
 
     if (!target) {
-        interaction.reply({
-            content: 'That player is not in the game.'
-        });
-        return false;
+        return [false];
     }
     else if (currentPlayer.playerID == target.playerID) {
-        interaction.reply({
-            content: "You can't give yourself points."
-        });
-        return false;
+        return [false];
     }
     else if (!target.alive) {
-        interaction.reply({
-            content: 'That player is dead.'
-        });
-        return false;
+        return [false];
     }
 
     for (var i = currentPlayer.pos.x - currentPlayer.range; i <= currentPlayer.pos.x + currentPlayer.range; i++) {
@@ -86,19 +78,12 @@ async function execute(interaction, playerData) {
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-                interaction.reply({
-                    content: `<@${currentPlayer.playerID}> has given <@${target.playerID}> ${amount} action points!`
-                });
-
-                return [currentPlayer, target];
+                return [`<@${currentPlayer.playerID}> has given <@${target.playerID}> ${amount} action points!`, currentPlayer, target];
             }
         }
     }
 
-    interaction.reply({
-        content: 'That player is out of your range.'
-    });
-    return false;
+    return [false];
 }
 
 export default {data, execute};

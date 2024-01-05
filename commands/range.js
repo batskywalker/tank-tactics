@@ -11,12 +11,16 @@ const data = new SlashCommandBuilder()
 .setDescription('Increase the range you can shoot in')
 
 async function execute(interaction, playerData) {
+    if (!playerData[0].started) {
+        interaction.reply({
+            content: "Actions can't be played right now."
+        });
+        return [false];
+    }
+
     for (var i = 1; i < playerData.length; i++) {
         if (interaction.user.id == playerData[i].playerID) {
             if (!playerData[i].alive) {
-                interaction.reply({
-                    content: "You are dead."
-                });
                 return false;
             }
             
@@ -33,10 +37,6 @@ async function execute(interaction, playerData) {
                 return [playerData[i]];
             }
             else {
-                interaction.reply({
-                    content: 'You have no more action points.'
-                });
-
                 return false;
             }
         }

@@ -43,10 +43,7 @@ async function execute(interaction, playerData) {
         return playerData;
     }
 
-    interaction.reply({
-        content: 'Game is already going!'
-    });
-    return false;
+    return [false];
 }
 
 export default {data, execute};

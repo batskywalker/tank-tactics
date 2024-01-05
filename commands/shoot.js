@@ -16,11 +16,20 @@ option.setName('target')
 );
 
 async function execute(interaction, playerData) {
+    if (!playerData[0].started) {
+        interaction.reply({
+            content: "Actions can't be played right now."
+        });
+        return [false];
+    }
+    
     var currentPlayer;
     var num1;
     var targetString = interaction.options.getUser('target');
     var target;
     var num2;
+    var reply;
+
     for (var i = 1; i < playerData.length; i++) {
         if (interaction.user.id == playerData[i].playerID) {
             currentPlayer = playerData[i];
@@ -30,17 +39,11 @@ async function execute(interaction, playerData) {
     }
 
     if (!currentPlayer.alive) {
-        interaction.reply({
-            content: "You are dead."
-        });
-        return false;
+        return [false];
     }
 
     if (currentPlayer.action <= 0) {
-        interaction.reply({
-            content: 'You have no more action points.'
-        });
-        return false;
+        return [false];
     }
 
     for (var i = 1; i < playerData.length; i++) {
@@ -51,22 +54,13 @@ async function execute(interaction, playerData) {
     }
 
     if (!target) {
-        interaction.reply({
-            content: 'That player is not in the game.'
-        });
-        return false;
+        return [false];
     }
     else if (currentPlayer.playerID == target.playerID) {
-        interaction.reply({
-            content: "You can't shoot yourself."
-        });
-        return false;
+        return [false];
     }
     else if (!target.alive) {
-        interaction.reply({
-            content: 'That player is already dead.'
-        });
-        return false;
+        return [false];
     }
 
     const attackDirection = [
@@ -92,22 +86,19 @@ async function execute(interaction, playerData) {
                     
 
                     if (playerData[0].amount_alive == 1) {
-                        interaction.reply({
-                            content: `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n<@${currentPlayer.playerID}> HAS WON THE GAME!`
-                        });
+                        reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n<@${currentPlayer.playerID}> HAS WON THE GAME!`;
+                        playerData[0].started = false;
+                        playerData[0].amount_alive = 0;
                     }
                     else {
-                        interaction.user.roles.remove('1190233509172891708');
-                        interaction.user.roles.add('1190234100137742386');
-                        interaction.reply({
-                            content: `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`
-                        });
+                        var dead = await interaction.options.getMember('target');
+                        await dead.roles.remove('1190233509172891708');
+                        await dead.roles.add('1190234100137742386');
+                        reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`;
                     }
                 }
                 else {
-                    interaction.reply({
-                        content: `<@${currentPlayer.playerID}> has shot <@${target.playerID}>!`
-                    });
+                    reply = `<@${currentPlayer.playerID}> has shot <@${target.playerID}>!`;
                 }
 
                 playerData[num1] = currentPlayer;
@@ -115,15 +106,12 @@ async function execute(interaction, playerData) {
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-                return [currentPlayer, target];
+                return [reply, currentPlayer, target];
             }
         }
     }
 
-    interaction.reply({
-        content: 'That player is out of your range.'
-    });
-    return false;
+    return [false];
 }
 
 export default {data, execute};
