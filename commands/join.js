@@ -27,7 +27,8 @@ async function execute(interaction, playerData) {
         range: 1,
         action: 3,
         health: 3,
-        queue: 0
+        queue: 0,
+        voted: false
     };
 
     for (var i = 1; i < playerData.length; i++) {
