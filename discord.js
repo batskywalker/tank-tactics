@@ -6,6 +6,7 @@ import fs from 'fs';
 import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import JSONbig from 'json-bigint';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,8 +34,10 @@ async function sendData(response, data) {
 }
 
 var playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
-var actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
-var poll = await JSON.parse(fs.readFileSync(`${__dirame}\\commands\\votes.json`, 'utf-8'));
+//var actionQueue = await JSONbig.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
+
+var actionQueue = [];
+var poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
 
 let sseResponse = [];
 
@@ -112,6 +115,26 @@ async function ExecuteCommand(interaction) {
             for (const response of sseResponse) {
                 await sendData(response, JSON.stringify(tempData));
             }
+
+            if (!playerData[0].started) {
+                var temp = playerData[0];
+                temp.amount_alive = 0;
+                temp.max_alive = 0;
+
+                for (var i = 1; i < playerData.length; i++) {
+                    var curr = client.guilds.cache.get(process.env.GUILDID).members.cache.get(playerData[i].playerID);
+
+                    if (playerData[i].alive) {
+                        curr.roles.remove('1190233509172891708');
+                    }
+                    else {
+                        curr.roles.remove('1190234100137742386');
+                    }
+                }
+
+                playerData = [temp];
+                fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+            }
         }
     }
     catch (error) {
@@ -143,30 +166,39 @@ client.on(Events.InteractionCreate, async interaction => {
 
             if (!curr) {
                 await interaction.reply({
-                    content: "You're not in the game."
+                    content: "You're not in the game.",
+                    ephemeral: true
                 });
                 return;
             }
 
             if (!playerData[curr].alive) {
                 await interaction.reply({
-                    content: "You're dead."
+                    content: "You're dead.",
+                    ephemeral: true
                 });
                 return;
             }
 
-            actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
+            //actionQueue = await JSONbig.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
 
             if (!actionQueue[playerData[curr].queue]) {
-                tempArray = [];
+                var tempArray = [interaction];
                 await actionQueue.push(tempArray);
             }
+            else {
+                await actionQueue[playerData[curr].queue].push(interaction);
+            }
 
-            await actionQueue[playerData[curr].queue].push(interaction);
             playerData[curr].queue += 1;
 
+            await interaction.reply({
+                content: 'Action submitted.',
+                ephemeral: true
+            });
+
             fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
-            fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
+            //fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSONbig.stringify(actionQueue));
         }
         else {
             await ExecuteCommand(interaction);
@@ -176,22 +208,43 @@ client.on(Events.InteractionCreate, async interaction => {
         poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
 
         for (var i = 1; i < playerData.length; i++) {
-            if (interaction.user.id == playerData[i].playerID && !playerData[i].voted) {
-                for (var j = 0; j < poll.length; j++) {
-                    if (interaction.component.customId == poll[j].id) {
-                        poll[j].votes += 1;
-                        playerData[i].voted = true;
+            if (interaction.user.id == playerData[i].playerID) {
+                if (!playerData[i].voted) {
+                    for (var j = 0; j < poll.length; j++) {
+                        if (interaction.component.customId == poll[j].id) {
+                            poll[j].votes += 1;
+                            playerData[i].voted = true;
 
-                        for (var k = j; k >= 0; k--) {
-                            if (poll[k].votes > poll[k - 1].votes) {
-                                var temp1 = poll[k - 1];
-                                var temp2 = poll[k];
+                            for (var k = j; k > 0; k--) {
+                                if (poll[k].votes > poll[k - 1].votes) {
+                                    var temp1 = poll[k - 1];
+                                    var temp2 = poll[k];
 
-                                poll[k - 1] = temp2;
-                                poll[k] = temp1;
+                                    poll[k - 1] = temp2;
+                                    poll[k] = temp1;
+                                }
+                                else {
+                                    break;
+                                }
                             }
+
+                            interaction.reply({
+                                content: 'Thanks for voting!',
+                                ephemeral: true
+                            });
+
+                            fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(poll));
+                            fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+                            break;
                         }
                     }
+                    break;
+                }
+                else {
+                    interaction.reply({
+                        content: "You've already voted",
+                        ephemeral: true
+                    });
                 }
             }
         }
@@ -202,36 +255,39 @@ var pointsGiven = false;
 
 async function GivePoints() {
     var theDate = new Date;
-    if (theDate.getHours() == 12) {
+    if (Math.floor(theDate.getMinutes() / 10) == 5) {
         if (!pointsGiven) {
             for (var i = 1; i < playerData.length; i++) {
+                playerData[i].voted = false;
                 if (playerData[i].alive) {
                     playerData[i].action += 1;
                 }
             }
-            pointsGiven = true;
+            
 
             client.channels.cache.get(process.env.CHANNELID).send('<@&1190233509172891708>\nEveryone has received an action point!')
 
             poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
             const highest = [];
 
-            if (playerData[0].alive < playerData[0].max_alive && poll.length > 0) {
-                highest.push(poll[0]);
-                for (var i = 0; i < poll.length; i++) {
-                    if (poll[i].votes == poll[0].votes) {
-                        highest.push(poll[i]);
+            if (playerData[0].amount_alive < playerData[0].max_alive && poll.length > 0) {
+                if (poll[0].votes > 0) {
+                    highest.push(poll[0]);
+                    for (var i = 1; i < poll.length; i++) {
+                        if (poll[i].votes == poll[0].votes) {
+                            highest.push(poll[i]);
+                        }
+                        else {
+                            break;
+                        }
                     }
-                    else {
-                        break;
-                    }
-                }
 
-                for (var i = 0; i < highest.length; i++) {
-                    for (var j = 1; j < playerData.length; j++) {
-                        if (highest[i].id == playerData[j].playerID) {
-                            playerData[j].action += 1;
-                            client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[j].playerID}> has recieved an extra point with ${highest[i].votes} votes for them!`);
+                    for (var i = 0; i < highest.length; i++) {
+                        for (var j = 1; j < playerData.length; j++) {
+                            if (highest[i].id == playerData[j].playerID) {
+                                playerData[j].action += 1;
+                                client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[j].playerID}> has recieved an extra point with ${highest[i].votes} votes!`);
+                            }
                         }
                     }
                 }
@@ -249,9 +305,14 @@ async function GivePoints() {
                 }
             }
 
-            fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, "[]");
+            for (var i = 1; i < playerData.length; i++) {
+                playerData[i].queue = 0;
+            }
 
-            if (playerData[0].alive < playerData[0].max_alive) {
+            actionQueue = [];
+            //fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, "[]");
+
+            if (playerData[0].amount_alive < playerData[0].max_alive) {
                 var buttons = [];
                 var newPoll = []
                 
@@ -264,8 +325,8 @@ async function GivePoints() {
 
                         newPoll.push(currPlayer);
 
-                        const button = new ButtonBuilder()
-                        .setLabel(currPlayer.id)
+                        var button = new ButtonBuilder()
+                        .setLabel(playerData[i].playerUser)
                         .setStyle(ButtonStyle.Secondary)
                         .setCustomId(currPlayer.id);
 
@@ -277,7 +338,12 @@ async function GivePoints() {
 
                 client.channels.cache.get(process.env.DEADCHANNELID).send({
                     content: '<@&1190234100137742386> Vote for who you want to recieve an extra point tomorrow.\n',
-                    components: buttons
+                    components: [
+                        {
+                            type: 1,
+                            components: buttons
+                        }
+                    ]
                 });
             }
         }
@@ -287,6 +353,6 @@ async function GivePoints() {
     }
 }
 
-setInterval(GivePoints, 600000);
+setInterval(GivePoints, 18000);
 
 client.login(process.env.DISCORD);

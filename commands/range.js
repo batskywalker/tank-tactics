@@ -21,23 +21,19 @@ async function execute(interaction, playerData) {
     for (var i = 1; i < playerData.length; i++) {
         if (interaction.user.id == playerData[i].playerID) {
             if (!playerData[i].alive) {
-                return false;
+                return [false];
             }
             
             if (playerData[i].action > 0) {
                 playerData[i].range += 1;
                 playerData[i].action -= 1;
 
-                interaction.reply({
-                    content: `<@${playerData[i].playerID}> has increased their shooting range.`
-                });
-
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-                return [playerData[i]];
+                return [`<@${playerData[i].playerID}> has increased their shooting range.`, playerData[i]];
             }
             else {
-                return false;
+                return [false];
             }
         }
     }

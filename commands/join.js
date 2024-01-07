@@ -34,7 +34,8 @@ async function execute(interaction, playerData) {
     for (var i = 1; i < playerData.length; i++) {
         if (player.playerID == playerData[i].playerID) {
             interaction.reply({
-                content: "You're already in the game."
+                content: "You're already in the game.",
+                ephemeral: true
             });
             return [false];
         }
@@ -44,12 +45,12 @@ async function execute(interaction, playerData) {
     playerData[0].amount_alive += 1;
     playerData[0].max_alive += 1;
 
-    interaction.user.roles.add('1190233509172891708');
+    interaction.member.roles.add('1190233509172891708');
 
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
     interaction.reply({
-        content: 'Thanks for joining!'
+        content: `<@${interaction.user.id}> has joined!`
     });
 
     return [false];
