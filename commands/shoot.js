@@ -25,7 +25,7 @@ async function execute(interaction, playerData) {
     
     var currentPlayer;
     var num1;
-    var targetString = interaction.options.getUser('target');
+    var targetString = interaction.options._hoistedOptions[0].user.id;
     var target;
     var num2;
     var reply;
@@ -91,9 +91,12 @@ async function execute(interaction, playerData) {
                         playerData[0].amount_alive = 0;
                     }
                     else {
-                        var dead = await interaction.options.getMember('target');
-                        await dead.roles.remove('1190233509172891708');
-                        await dead.roles.add('1190234100137742386');
+                        var dead = await interaction.options._hoistedOptions[0].member;
+                        for (var m = 0; m < dead.roles.length; m++) {
+                            if (dead.roles[m] == "1190233509172891708") {
+                                dead.roles[m] = "1190234100137742386";
+                            }
+                        }
                         reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`;
                     }
                 }

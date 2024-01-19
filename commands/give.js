@@ -30,10 +30,10 @@ async function execute(interaction, playerData) {
     
     var currentPlayer;
     var num1;
-    var targetString = interaction.options.getUser('target');
+    var targetString = interaction.options._hoistedOptions[0].user.id;
     var target;
     var num2;
-    var amount = interaction.options.getNumber('amount');
+    var amount = interaction.options._hoistedOptions[1].value;
     for (var i = 1; i < playerData.length; i++) {
         if (interaction.user.id == playerData[i].playerID) {
             currentPlayer = playerData[i];

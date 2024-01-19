@@ -11,7 +11,7 @@ const data = new SlashCommandBuilder()
 .setDescription('Start the game.')
 
 async function execute(interaction, playerData) {
-    if (!playerData[0].started) {
+    if (!playerData[0].started && interaction.user.id == '327298783526387713') {
         playerData[0].started = true;
 
         for (var i = 1; i < playerData.length; i++) {
@@ -33,14 +33,10 @@ async function execute(interaction, playerData) {
                 }
             }
         }
-
-        interaction.reply({
-            content: 'Game has started!'
-        });
         
         fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-        return playerData;
+        return ['Game has started!', playerData];
     }
 
     return [false];

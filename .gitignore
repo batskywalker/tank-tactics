@@ -1,2 +1,6 @@
 
 .env
+commands/player-data.json
+commands/votes.json
+*.json
+commands/player-data.json

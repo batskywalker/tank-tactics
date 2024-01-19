@@ -28,7 +28,7 @@ async function execute(interaction, playerData) {
         return [false];
     }
     
-    const directionString = interaction.options.getString('direction');
+    const directionString = interaction.options._hoistedOptions[0].value;
     var direction
 
     switch(directionString) {
@@ -44,6 +44,8 @@ async function execute(interaction, playerData) {
         case 'right':
             direction = [1, 0];
             break;
+        default:
+            return [false];
     }
 
     var currentPlayer;
