@@ -28,7 +28,8 @@ async function execute(interaction, playerData) {
         action: 3,
         health: 3,
         queue: 0,
-        voted: false
+        voted: false,
+        votedFor: null
     };
 
     for (var i = 1; i < playerData.length; i++) {

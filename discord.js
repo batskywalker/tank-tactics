@@ -120,17 +120,21 @@ async function ExecuteCommand(interaction) {
                 var temp = playerData[0];
                 temp.amount_alive = 0;
                 temp.max_alive = 0;
-
-                for (var i = 1; i < playerData.length; i++) {
-                    var curr = client.guilds.cache.get(process.env.GUILDID).members.cache.get(playerData[i].playerID);
-
-                    if (playerData[i].alive) {
-                        curr.roles.remove('1190233509172891708');
-                    }
-                    else {
-                        curr.roles.remove('1190234100137742386');
-                    }
-                }
+                var guild = client.guilds.cache.get('1184701532822851655');
+                await guild.members.fetch().then(users => {
+                    users.forEach(async theUser => {
+                        for (var i = 1; i < playerData.length; i++) {
+                            if (playerData[i].playerID == theUser.user.id) {
+                                if (playerData[i].alive) {
+                                    theUser.roles.remove('1190233509172891708');
+                                }
+                                else {
+                                    theUser.roles.remove('1190234100137742386');
+                                }
+                            }
+                        }
+                    });
+                });
 
                 playerData = [temp];
                 fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
@@ -153,6 +157,32 @@ async function ExecuteCommand(interaction) {
         }
     }
 }
+
+client.on("messageCreate", async (msg) => {
+    if (msg.content.toLowerCase().startsWith(".get") && msg.channel.id == "1198525372334080020") {
+        //console.log(msg);
+        playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+        var guild = client.guilds.cache.get('1184701532822851655');
+        await guild.members.fetch().then(users => {
+            users.forEach(async theUser => {
+                if (theUser.user.id === msg.content.slice(5)) {
+                    for (var i = 1; i < playerData.length; i++) {
+                        if (playerData[i].playerID == theUser.user.id) {
+                            playerData[i].icon = theUser.user.avatar;
+                            fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+                            for (const response of sseResponse) {
+                                await sendData(response, JSON.stringify(playerData[i]));
+                            }
+                            break;
+                        }
+                    }
+                }
+            })
+            
+        });
+        //msg.reply(avatarID);
+    }
+})
 
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
@@ -217,10 +247,18 @@ client.on(Events.InteractionCreate, async interaction => {
         for (var i = 1; i < playerData.length; i++) {
             if (interaction.user.id == playerData[i].playerID) {
                 if (!playerData[i].voted) {
+                    if (playerData[i].votedFor == interaction.component.customId) {
+                        interaction.reply({
+                            content: "You voted for that player yesterday, please change your vote.",
+                            ephemeral: true
+                        });
+                        return;
+                    }
                     for (var j = 0; j < poll.length; j++) {
                         if (interaction.component.customId == poll[j].id) {
                             poll[j].votes += 1;
                             playerData[i].voted = true;
+                            playerData[i].votedFor = interaction.component.customId;
 
                             for (var k = j; k > 0; k--) {
                                 if (poll[k].votes > poll[k - 1].votes) {
