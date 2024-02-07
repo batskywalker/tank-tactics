@@ -320,10 +320,16 @@ async function GivePoints() {
             fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
 
             for (var i = 1; i < playerData.length; i++) {
-                playerData[i].voted = false;
                 if (playerData[i].alive) {
                     playerData[i].action += 1;
                 }
+                else {
+                    if (!playerData[i].voted) {
+                        playerData[i].votedFor = null;
+                    }
+                }
+
+                playerData[i].voted = false;
             }
             
             client.channels.cache.get(process.env.CHANNELID).send('<@&1190233509172891708>\nEveryone has received an action point!')
