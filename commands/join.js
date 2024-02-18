@@ -20,6 +20,7 @@ async function execute(interaction, playerData) {
         playerUser: interaction.user.username,
         icon: interaction.user.avatar,
         alive: true,
+        shown: true,
         pos: {
             x: 0,
             y: 0,

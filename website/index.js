@@ -40,24 +40,26 @@ window.onload = function() {
                     gameBoard.children[x].children[y].removeChild(gameBoard.children[x].children[y].children[1]);
                 }
 
-                gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].classList.add('occupied');
+                if (data[i].shown) {
+                    gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].classList.add('occupied');
 
-                gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].setAttribute('src', `https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}`);
+                    gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].setAttribute('src', `https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}`);
 
-                gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].setAttribute('alt', data[i].playerUser);
+                    gameBoard.children[data[i].pos.y].children[data[i].pos.x].children[0].setAttribute('alt', data[i].playerUser);
 
-                const playerValue = document.createElement('div');
-                playerValue.classList.add('player-data');
-                playerValue.style.display = 'none';
+                    const playerValue = document.createElement('div');
+                    playerValue.classList.add('player-data');
+                    playerValue.style.display = 'none';
 
-                if (data[i].alive) {
-                    playerValue.innerHTML = `<div class='idunno'><img class='avatar' src='https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}' height='250px' width='250px'> <h2>${data[i].playerUser}</h2><br> <p>Range: ${data[i].range}</p><br> <p>Health: ${data[i].health}</p><br> <p>Action Points: ${data[i].action}</p><br></div>`
-                    gameBoard.children[data[i].pos.y].children[data[i].pos.x].appendChild(playerValue);
-                }
-                else {
-                    gameBoard.children[data[i].pos.y].children[data[i].pos.x].classList.add('dead');
-                    playerValue.innerHTML = `<div class='idunno'><img class='avatar' src='https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}' height='250px' width='250px'> <h2>${data[i].playerUser}</h2><br> <h2>Dead</h2></div>`
-                    gameBoard.children[data[i].pos.y].children[data[i].pos.x].appendChild(playerValue);
+                    if (data[i].alive) {
+                        playerValue.innerHTML = `<div class='idunno'><img class='avatar' src='https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}' height='250px' width='250px'> <h2>${data[i].playerUser}</h2><br> <p>Range: ${data[i].range}</p><br> <p>Health: ${data[i].health}</p><br> <p>Action Points: ${data[i].action}</p><br></div>`
+                        gameBoard.children[data[i].pos.y].children[data[i].pos.x].appendChild(playerValue);
+                    }
+                    else {
+                        gameBoard.children[data[i].pos.y].children[data[i].pos.x].classList.add('dead');
+                        playerValue.innerHTML = `<div class='idunno'><img class='avatar' src='https://cdn.discordapp.com/avatars/${data[i].playerID}/${data[i].icon}' height='250px' width='250px'> <h2>${data[i].playerUser}</h2><br> <h2>Dead</h2></div>`
+                        gameBoard.children[data[i].pos.y].children[data[i].pos.x].appendChild(playerValue);
+                    }
                 }
             }
         }
@@ -96,7 +98,16 @@ window.onload = function() {
                 current.children[1].children[0].style.display = 'block';
                 previous = current;
 
-                var range = parseInt(current.children[1].children[0].children[3].textContent.slice(7), 10);
+                var isDead = current.children[1].children[0].children[3].textContent;
+                var range;
+
+                if (isDead == "Dead") {
+                    range = 1;
+                }
+                else {
+                    range = parseInt(current.children[1].children[0].children[3].textContent.slice(7), 10);
+                }
+                
                 var pos = [];
                 var m = 0;
                 for (const classes of current.classList) {
