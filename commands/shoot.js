@@ -38,11 +38,7 @@ async function execute(interaction, playerData) {
         }
     }
 
-    if (!currentPlayer.alive) {
-        return [false];
-    }
-
-    if (currentPlayer.action <= 0) {
+    if (!currentPlayer.alive || currentPlayer.action <= 0) {
         return [false];
     }
 
@@ -53,13 +49,7 @@ async function execute(interaction, playerData) {
         }
     }
 
-    if (!target) {
-        return [false];
-    }
-    else if (currentPlayer.playerID == target.playerID) {
-        return [false];
-    }
-    else if (!target.alive) {
+    if (!target || currentPlayer.playerID == target.playerID || !target.shown) {
         return [false];
     }
 
@@ -80,10 +70,14 @@ async function execute(interaction, playerData) {
                 currentPlayer.action -= 1;
                 target.health -= 1;
 
-                if (target.health <= 0) {
+                if (!target.alive) {
+                    target.shots++;
+                    reply = `<@${currentPlayer.playerID}> has shot the wreckage of <@${target.playerID}>!`;
+                }
+                else if (target.health <= 0) {
                     target.alive = false;
                     playerData[0].amount_alive -= 1;
-                    
+                    currentPlayer.action += target.action;
 
                     if (playerData[0].amount_alive == 1) {
                         reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n<@${currentPlayer.playerID}> HAS WON THE GAME!`;
@@ -91,12 +85,6 @@ async function execute(interaction, playerData) {
                         playerData[0].amount_alive = 0;
                     }
                     else {
-                        var dead = await interaction.options._hoistedOptions[0].member;
-                        for (var m = 0; m < dead.roles.length; m++) {
-                            if (dead.roles[m] == "1190233509172891708") {
-                                dead.roles[m] = "1190234100137742386";
-                            }
-                        }
                         reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`;
                     }
                 }
