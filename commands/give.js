@@ -14,7 +14,7 @@ option.setName('target')
 .setDescription('The player you want to give points to')
 .setRequired(true)    
 )
-.addNumberOption(option =>
+.addIntegerOption(option =>
 option.setName('amount')
 .setDescription('The amount of points you want to give this player')
 .setRequired(true)

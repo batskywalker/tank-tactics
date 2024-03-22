@@ -31,7 +31,8 @@ async function execute(interaction, playerData) {
         queue: 0,
         voted: false,
         votedFor: null,
-        shots: 0
+        shots: 0,
+        bounty: false
     };
 
     for (var i = 1; i < playerData.length; i++) {

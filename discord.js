@@ -126,7 +126,6 @@ async function Deadify(userID) {
     await guild.members.fetch().then(users => {
         users.forEach(async theUser => {
             if (userID == theUser.user.id) {
-                theUser.roles.remove('1190233509172891708');
                 theUser.roles.add('1190234100137742386');
             }
         });
@@ -154,8 +153,12 @@ async function ExecuteCommand(interaction) {
                 await sendData(response, JSON.stringify(tempData));
             }
 
-            if (tempData[1] && !tempData[1].alive) {
-                Deadify(tempData[1].userID);
+            if (tempData.length > 0) {
+                for (var i = 0; i < tempData.length; i++) {
+                    if (!tempData[i].alive) {
+                        await Deadify(tempData[i].playerID);
+                    }
+                }
             }
 
             if (!playerData[0].started && playerData[0].amount_alive < playerData[0].max_alive) {
@@ -165,18 +168,6 @@ async function ExecuteCommand(interaction) {
     }
     catch (error) {
         console.log(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        }
-        else {
-            await interaction.reply({
-                content: 'There was an error while executing this command!',
-                ephemeral: true
-            });
-        }
     }
 }
 
@@ -329,7 +320,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-var pointsGiven = true;
+var pointsGiven = false;
 
 async function GivePoints() {
     var theDate = new Date;
@@ -366,13 +357,13 @@ async function GivePoints() {
 
                                 if (playerData[j].health <= 0) {
                                     playerData[j].alive = false;
-                                    Deadify(playerData.userID);
+                                    await Deadify(playerData.playerID);
                                     playerData[0].amount_alive--;
 
-                                    client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[j].userID}> got blown up by the wreckage of <@${playerData[i].userID}>!\n${playerData[0].amount_alive} players left!`);
+                                    client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[j].playerID}> got blown up by the wreckage of <@${playerData[i].playerID}>!\n${playerData[0].amount_alive} players left!`);
                                 }
                                 else {
-                                    client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[j].userID}> got damaged by the wreckage of <@${playerData[i].userID}>!`);
+                                    client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[j].playerID}> got damaged by the wreckage of <@${playerData[i].playerID}>!`);
                                 }
                             }
                         }
@@ -385,7 +376,7 @@ async function GivePoints() {
             if (playerData[0].amount_alive == 1) {
                 for (var i = 1; i < playerData.length; i++) {
                     if (playerData[i].alive) {
-                        client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[i].userID}> HAS WON THE GAME!`);
+                        client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[i].playerID}> HAS WON THE GAME!`);
                     }
                 }
                 EndGame();
@@ -441,19 +432,39 @@ async function GivePoints() {
                 var maxVotes = 0;
 
                 for (var i = 0; i < poll.length; i++) {
-                    for (var j = 0; j < poll[i].votes; j++) {
-                        votePool.push(i);
-                        maxVotes++;
+                    if (poll[i].votes) {
+                        for (var j = 0; j < poll[i].votes; j++) {
+                            votePool.push(i);
+                            maxVotes++;
+                        }
                     }
                 }
 
-                const random = Math.floor(Math.random() * maxVotes);
-                const percent = (poll[random].votes / maxVotes) * 100;
+                var random = Math.floor(Math.random() * maxVotes);
+            
+                var isGood = true;
 
-                for (var i = 1; i < playerData.length; i++) {
-                    if (poll[random].id == playerData[i].playerID) {
-                        playerData[i].action++;
-                        client.channels.cache.get(process.env.CHANNELID).send(`With a ${percent}% chance of winning, <@${playerData[j].playerID}> has recieved an extra point!`);
+                while(isGood) {
+                    for (var i = 1; i < playerData.length; i++) {
+                        if (poll[random]) {
+                            if (poll[random].id == playerData[i].playerID) {
+                                if (!playerData[i].alive) {
+                                    random = Math.floor(Math.random() * maxVotes);
+                                    
+                                    break;
+                                }
+                                isGood = false;
+                                var percent = (poll[random].votes / maxVotes) * 100;
+
+                                playerData[i].action += 1;
+                                client.channels.cache.get(process.env.CHANNELID).send(`With a ${percent.toFixed(1)}% chance of winning, <@${playerData[i].playerID}> has received an extra point!`);
+                            }
+                        }
+                        else {
+                            random = Math.floor(Math.random() * maxVotes);
+                                    
+                            break;
+                        }
                     }
                 }
             }
@@ -507,7 +518,7 @@ async function GivePoints() {
                 fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(newPoll));
 
                 client.channels.cache.get(process.env.DEADCHANNELID).send({
-                    content: '<@&1190234100137742386> Vote for who you want to recieve an extra point tomorrow.\n',
+                    content: '<@&1190234100137742386> Vote for who you want to receive an extra point tomorrow.\n',
                     components: rows
                 });
             }

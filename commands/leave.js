@@ -22,7 +22,7 @@ async function execute(interaction, playerData) {
             interaction.member.roles.remove('1190233509172891708');
 
             interaction.reply({
-                content: `<@${interaction.user.id} has left the game.`
+                content: `<@${interaction.user.id}> has left the game.`
             });
 
             fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
