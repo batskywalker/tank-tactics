@@ -20,7 +20,7 @@ const data = new SlashCommandBuilder()
     .setRequired(true)
 );
 
-async function execute(interaction, playerData) {
+async function execute(interaction, playerData, bountyPoints, votes) {
     
 }
 

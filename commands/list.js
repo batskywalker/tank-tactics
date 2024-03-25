@@ -18,8 +18,26 @@ const data = new SlashCommandBuilder()
             {name: 'players', value: 'players'},
         ));
 
-async function execute(interaction, playerData) {
-    
+async function execute(interaction, playerData, actionQueue, bountyPoints) {
+    if (!playerData[0].started) {
+        interaction.reply({
+            content: "Game hasn't started."
+        });
+        return;
+    }
+
+    const optionString = interaction.options._hoistedOptions[0].value;
+    var result = '';
+
+    if (optionString == 'actions') {
+        for (var i = 0; i < actionQueue.length; i++) {
+            for (var j = 0; j < actionQueue[i].length; j++) {
+                if (actionQueue[i][j].user.id == interaction.user.id) {
+                    
+                }
+            }
+        }
+    }
 }
 
 export default {data, execute};

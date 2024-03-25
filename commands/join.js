@@ -10,12 +10,12 @@ const data = new SlashCommandBuilder()
 .setName('join')
 .setDescription('Join the game.')
 
-async function execute(interaction, playerData) {
+async function execute(interaction, playerData, bountyPoints) {
     if (playerData[0].started) {
         return [false];
     }
 
-    const player = {
+    var player = {
         playerID: interaction.user.id,
         playerUser: interaction.user.username,
         icon: interaction.user.avatar,
@@ -32,7 +32,8 @@ async function execute(interaction, playerData) {
         voted: false,
         votedFor: null,
         shots: 0,
-        bounty: false
+        bounty: false,
+        pointPos: 0
     };
 
     for (var i = 1; i < playerData.length; i++) {
@@ -43,6 +44,25 @@ async function execute(interaction, playerData) {
             });
             return [false];
         }
+    }
+
+    var found = false;
+
+    for (var i = 0; i < bountyPoints.length; i++) {
+        if (interaction.user.id == bountyPoints[i].id) {
+            found = true;
+            player.pointPos = i;
+        }
+    }
+
+    if (!found) {
+        const tempBounty = {
+            playerID: interaction.user.id,
+            playerUser: interaction.user.username,
+            points: 100
+        };
+        player.pointPos = bountyPoints.length;
+        bountyPoints.push(tempBounty);
     }
 
     playerData.push(player);

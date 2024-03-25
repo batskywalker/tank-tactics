@@ -18,7 +18,7 @@ const data = new SlashCommandBuilder()
             {name: 'bounty', value: 'bounty'},
         ));
 
-async function execute(interaction, playerData) {
+async function execute(interaction, playerData, actionQueue, bounties, bountyPoints) {
     
 }
 
