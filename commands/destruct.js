@@ -12,57 +12,51 @@ const data = new SlashCommandBuilder()
 
 async function execute(interaction, playerData) {
     var response = [``];
-    if (!playerData[0].started) {
+    if (!playerData.data.started) {
         interaction.reply({
             content: "Actions can't be played right now."
         });
         return [false];
     }
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (interaction.user.id == playerData[i].playerID) {
-            var curr = playerData[i];
-            if (!curr.alive) {
-                return [false];
-            }
-
-            response[0] = `<@${curr.playerID}> has self-destructed dealing ${curr.health} damage to:`;
-            response.push(curr);
-            var respMessage = ``;
-
-            curr.alive = false;
-            curr.shown = false;
-            playerData[0].amount_alive--;
-            
-            for (var j = 1; j < playerData.length; j++) {
-                var target = playerData[j];
-                if (target.alive && (target.pos.x >= curr.pos.x - 2 && target.pos.x <= curr.pos.x + 2) && (target.pos.y >= curr.pos.y - 2 && target.pos.y <= curr.pos.y + 2)) {
-                    target.health -= curr.health;
-                    if (target.health <= 0) {
-                        target.alive = false;
-                        playerData[0].amount_alive--;
-                        respMessage += `\n<@${target.playerID}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
-                    }
-                    else {
-                        respMessage += `\n<@${target.playerID}, leaving them with ${target.health}!`;
-                    }
-                    
-                    playerData[j] = target;
-                    response.push(target);
-                }
-            }
-
-            if (respMessage.length == 0) {
-                response[0] += `\nNo one.`;
-            }
-
-            playerData[i] = curr;
-
-            fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
-
-            return response;
-        }
+    const player = interaction.user.id;
+    if (!playerData[player].alive) {
+        return [false];
     }
+
+    response[0] = `<@${playerData[player].playerID}> has self-destructed dealing ${playerData[player].health} damage to:`;
+    response.push(playerData[player]);
+    var respMessage = ``;
+
+    playerData[player].alive = false;
+    playerData[player].shown = false;
+    playerData.data.amount_alive--;
+    
+    Object.keys(playerData).forEach(key => {
+        // key is the potential victims id
+        if (playerData[key].alive && (playerData[key].pos.x >= playerData[player].pos.x - 2 && playerData[key].pos.x <= playerData[player].pos.x + 2) && (playerData[key].pos.y >= playerData[player].pos.y - 2 && playerData[key].pos.y <= playerData[player].pos.y + 2)) {
+            playerData[key].health -= playerData[player].health;
+
+            if (playerData[key].health <= 0) {
+                playerData[key].alive = false;
+                playerData.data.amount_alive--;
+                respMessage += `\n<@${playerData[key].playerID}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
+            }
+            else {
+                respMessage += `\n<@${playerData[key].playerID}, leaving them with ${playerData[key].health}!`;
+            }
+            
+            response.push(playerData[key]);
+        }
+    });
+
+    if (respMessage.length == 0) {
+        response[0] += `\nNo one.`;
+    }
+
+    fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+
+    return response;
 }
 
 export default {data, execute};

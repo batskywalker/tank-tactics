@@ -11,31 +11,29 @@ const data = new SlashCommandBuilder()
 .setDescription('Increase the range you can shoot in')
 
 async function execute(interaction, playerData) {
-    if (!playerData[0].started) {
+    if (!playerData.data.started) {
         interaction.reply({
             content: "Actions can't be played right now."
         });
         return [false];
     }
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (interaction.user.id == playerData[i].playerID) {
-            if (!playerData[i].alive) {
-                return [false];
-            }
-            
-            if (playerData[i].action > 0) {
-                playerData[i].range += 1;
-                playerData[i].action -= 1;
+    const id = interaction.user.id;
 
-                fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+    if (!playerData[id].alive) {
+        return [false];
+    }
+    
+    if (playerData[id].action > 0) {
+        playerData[id].range += 1;
+        playerData[id].action -= 1;
 
-                return [`<@${playerData[i].playerID}> has increased their shooting range.`, playerData[i]];
-            }
-            else {
-                return [false];
-            }
-        }
+        fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+
+        return [`<@${interaction.user.id}> has increased their shooting range.`, playerData[id]];
+    }
+    else {
+        return [false];
     }
 }
 

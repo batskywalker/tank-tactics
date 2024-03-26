@@ -21,15 +21,16 @@ option.setName('direction')
 ));
 
 async function execute(interaction, playerData) {
-    if (!playerData[0].started) {
+    if (!playerData.data.started) {
         interaction.reply({
             content: "Actions can't be played right now."
         });
         return [false];
     }
     
+    const player = interaction.user.id;
     const directionString = interaction.options._hoistedOptions[0].value;
-    var direction
+    var direction;
 
     switch(directionString) {
         case 'up':
@@ -48,39 +49,28 @@ async function execute(interaction, playerData) {
             return [false];
     }
 
-    var currentPlayer;
-    var num;
-    for (var i = 1; i < playerData.length; i++) {
-        if (interaction.user.id == playerData[i].playerID) {
-            currentPlayer = playerData[i];
-            num = i;
-
-            if (!currentPlayer.alive) {
-                return [false];
-            }
-
-            for (var j = 1; j < playerData.length; j++) {
-                if (currentPlayer.pos.x + direction[0] == playerData[j].pos.x && currentPlayer.pos.y + direction[1] == playerData[j].pos.y) {
-                    return [false];
-                }
-            }
-            break;
-        }
+    if (!playerData[player].alive) {
+        return [false];
     }
 
-    if ((currentPlayer.pos.x + direction[0] >= 0 && currentPlayer.pos.x + direction[0] < playerData[0].width) && (currentPlayer.pos.y + direction[1] >= 0 && currentPlayer.pos.y + direction[1] < playerData[0].height)) {
-        if (currentPlayer.action > 0) {
-            const previous = [currentPlayer.pos.x, currentPlayer.pos.y];
-            currentPlayer.action -= 1;
-            currentPlayer.pos.x += direction[0];
-            currentPlayer.pos.y += direction[1];
-            playerData[num] = currentPlayer;
+    Object.keys(playerData).forEach(key => {
+        if (playerData[player].pos.x + direction[0] == playerData[key].pos.x && playerData[player].pos.y + direction[1] == playerData[key].pos.y) {
+            return [false];
+        }
+    })
+
+    if ((playerData[player].pos.x + direction[0] >= 0 && playerData[player].pos.x + direction[0] < playerData.data.width) && (playerData[player].pos.y + direction[1] >= 0 && playerData[player].pos.y + direction[1] < playerData.data.height)) {
+        if (playerData[player].action > 0) {
+            const previous = [playerData[player].pos.x, playerData[player].pos.y];
+            playerData[player].action -= 1;
+            playerData[player].pos.x += direction[0];
+            playerData[player].pos.y += direction[1];
 
             fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-            currentPlayer['prev_pos'] = previous;
+            playerData[player]['prev_pos'] = previous;
 
-            return [`<@${currentPlayer.playerID}> has moved ${directionString}.`, currentPlayer];
+            return [`<@${playerData[player].playerID}> has moved ${directionString}.`, playerData[player]];
         }
         else {
             return [false];

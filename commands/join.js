@@ -11,11 +11,11 @@ const data = new SlashCommandBuilder()
 .setDescription('Join the game.')
 
 async function execute(interaction, playerData, bountyPoints) {
-    if (playerData[0].started) {
+    if (playerData.data.started) {
         return [false];
     }
 
-    var player = {
+    var newPlayer = {
         playerID: interaction.user.id,
         playerUser: interaction.user.username,
         icon: interaction.user.avatar,
@@ -35,23 +35,26 @@ async function execute(interaction, playerData, bountyPoints) {
         bounty: false
     };
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (player.playerID == playerData[i].playerID) {
-            interaction.reply({
-                content: "You're already in the game.",
-                ephemeral: true
-            });
-            return [false];
-        }
+    const player = interaction.user.id;
+
+    if (playerData[player]) {
+        interaction.reply({
+            content: "You're already in the game.",
+            ephemeral: true
+        });
+        return [false];
     }
 
-    if (!bountyPoints[toString(interaction.user.id)]) {
-        
+    if (!bountyPoints[player]) {
+        bountyPoints[player] = {};
+        bountyPoints[player]['playerID'] = interaction.user.id;
+        bountyPoints[player]['playerUser'] = interaction.user.id;
+        bountyPoints[player]['points'] = 100;
     }
 
-    playerData.push(player);
-    playerData[0].amount_alive += 1;
-    playerData[0].max_alive += 1;
+    playerData[player] = newPlayer;
+    playerData.data.amount_alive += 1;
+    playerData.data.max_alive += 1;
 
     interaction.member.roles.add('1190233509172891708');
 

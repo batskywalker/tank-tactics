@@ -21,66 +21,42 @@ option.setName('amount')
 );
 
 async function execute(interaction, playerData) {
-    if (!playerData[0].started) {
+    if (!playerData.data.started) {
         interaction.reply({
             content: "Actions can't be played right now."
         });
         return [false];
     }
     
-    var currentPlayer;
-    var num1;
-    var targetString = interaction.options._hoistedOptions[0].user.id;
-    var target;
-    var num2;
+    var player = interaction.user.id;
+    var target = interaction.options._hoistedOptions[0].user.id;
     var amount = interaction.options._hoistedOptions[1].value;
-    for (var i = 1; i < playerData.length; i++) {
-        if (interaction.user.id == playerData[i].playerID) {
-            currentPlayer = playerData[i];
-            num1 = i;
-            break;
-        }
-    }
 
-    if (!currentPlayer.alive) {
+    if (!playerData[player].alive) {
         return [false];
     }
 
-    if (currentPlayer.action <= 0 || amount > currentPlayer.action) {
+    if (playerData[player].action <= 0 || amount > playerData[player].action) {
         return [false];
     }
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (targetString == playerData[i].playerID) {
-            target = playerData[i];
-            num2 = i;
-        }
-    }
-
-    if (!target) {
+    if (!playerData[target]) {
         return [false];
     }
-    else if (currentPlayer.playerID == target.playerID) {
+    else if (player == target) {
         return [false];
     }
-    else if (!target.alive) {
+    else if (!playerData[target].alive) {
         return [false];
     }
 
-    for (var i = currentPlayer.pos.x - currentPlayer.range; i <= currentPlayer.pos.x + currentPlayer.range; i++) {
-        for (var j = currentPlayer.pos.y - currentPlayer.range; j <= currentPlayer.pos.y + currentPlayer.range; j++) {
-            if (target.pos.x == i && target.pos.y == j) {
-                currentPlayer.action -= amount;
-                target.action += amount;
+    if ((playerData[target].pos.x >= playerData[player].pos.x - playerData[player].range && playerData[target].pos.x <= playerData[player].pos.x + playerData[player].range) && (playerData[target].pos.y >= playerData[player].pos.y - playerData[player].range && playerData[target].pos.y <= playerData[player].pos.y + playerData[player].range)) {
+        playerData[player].action -= amount;
+        playerData[target].action += amount;
 
-                playerData[num1] = currentPlayer;
-                playerData[num2] = target;
+        fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-                fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
-
-                return [`<@${currentPlayer.playerID}> has given <@${target.playerID}> ${amount} action points!`, currentPlayer, target];
-            }
-        }
+        return [`<@${playerData[player].playerID}> has given <@${playerData[target].playerID}> ${amount} action points!`, playerData[player], playerData[target]];
     }
 
     return [false];

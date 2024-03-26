@@ -11,12 +11,14 @@ const data = new SlashCommandBuilder()
 .setDescription('Leave the game.')
 
 async function execute(interaction, playerData) {
-    if (playerData[0].started) {
+    if (playerData.data.started) {
         return [false];
     }
 
-    if (playerData[toString(interaction.user.id)]) {
-        delete playerData[toString(interaction.user.id)];
+    const player = interaction.user.id;
+
+    if (playerData[player]) {
+        delete playerData[player];
 
         interaction.member.roles.remove('1190233509172891708');
 

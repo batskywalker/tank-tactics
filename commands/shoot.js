@@ -16,40 +16,22 @@ option.setName('target')
 );
 
 async function execute(interaction, playerData) {
-    if (!playerData[0].started) {
+    if (!playerData.data.started) {
         interaction.reply({
             content: "Actions can't be played right now."
         });
         return [false];
     }
     
-    var currentPlayer;
-    var num1;
-    var targetString = interaction.options._hoistedOptions[0].user.id;
-    var target;
-    var num2;
+    const player = interaction.user.id;
+    const target = interaction.options._hoistedOptions[0].user.id;
     var reply;
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (interaction.user.id == playerData[i].playerID) {
-            currentPlayer = playerData[i];
-            num1 = i;
-            break;
-        }
-    }
-
-    if (!currentPlayer.alive || currentPlayer.action <= 0) {
+    if (!playerData[player].alive || playerData[player].action <= 0) {
         return [false];
     }
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (targetString == playerData[i].playerID) {
-            target = playerData[i];
-            num2 = i;
-        }
-    }
-
-    if (!target || currentPlayer.playerID == target.playerID || !target.shown) {
+    if (!playerData[target] || playerData[player].playerID == playerData[target].playerID || !playerData[target].shown) {
         return [false];
     }
 
@@ -65,39 +47,36 @@ async function execute(interaction, playerData) {
     ];
 
     for (var i = 0; i < 8; i++) {
-        for (var j = 1; j <= currentPlayer.range; j++) {
-            if (target.pos.x == currentPlayer.pos.x + (attackDirection[i][0] * j) && target.pos.y == currentPlayer.pos.y + (attackDirection[i][1] * j)) {
-                currentPlayer.action -= 1;
-                target.health -= 1;
+        for (var j = 1; j <= playerData[player].range; j++) {
+            if (playerData[target].pos.x == playerData[player].pos.x + (attackDirection[i][0] * j) && playerData[target].pos.y == playerData[player].pos.y + (attackDirection[i][1] * j)) {
+                playerData[player].action -= 1;
+                playerData[target].health -= 1;
 
-                if (!target.alive) {
-                    target.shots++;
-                    reply = `<@${currentPlayer.playerID}> has shot the wreckage of <@${target.playerID}>!`;
+                if (!playerData[target].alive) {
+                    playerData[target].shots++;
+                    reply = `<@${playerData[player].playerID}> has shot the wreckage of <@${playerData[target].playerID}>!`;
                 }
-                else if (target.health <= 0) {
-                    target.alive = false;
-                    playerData[0].amount_alive -= 1;
-                    currentPlayer.action += target.action;
+                else if (playerData[target].health <= 0) {
+                    playerData[target].alive = false;
+                    playerData.data.amount_alive -= 1;
+                    playerData[player].action += playerData[target].action;
 
-                    if (playerData[0].amount_alive == 1) {
-                        reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n<@${currentPlayer.playerID}> HAS WON THE GAME!`;
-                        playerData[0].started = false;
-                        playerData[0].amount_alive = 0;
+                    if (playerData.data.amount_alive == 1) {
+                        reply = `<@${playerData[player].playerID}> has killed <@${playerData[target].playerID}>!\n<@${playerData[player].playerID}> HAS WON THE GAME!`;
+                        playerData.data.started = false;
+                        playerData.data.amount_alive = 0;
                     }
                     else {
-                        reply = `<@${currentPlayer.playerID}> has killed <@${target.playerID}>!\n${playerData[0].amount_alive} players remain!`;
+                        reply = `<@${playerData[player].playerID}> has killed <@${playerData[target].playerID}>!\n${playerData.data.amount_alive} players remain!`;
                     }
                 }
                 else {
-                    reply = `<@${currentPlayer.playerID}> has shot <@${target.playerID}>!`;
+                    reply = `<@${playerData[player].playerID}> has shot <@${playerData[target].playerID}>!`;
                 }
-
-                playerData[num1] = currentPlayer;
-                playerData[num2] = target;
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-                return [reply, currentPlayer, target];
+                return [reply, playerData[player], playerData[target]];
             }
         }
     }
