@@ -36,6 +36,8 @@ async function sendData(response, data) {
 var playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
 var actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
 var poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+var bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
+var bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));
 
 let sseResponse = [];
 
@@ -377,6 +379,7 @@ async function GivePoints() {
                 for (var i = 1; i < playerData.length; i++) {
                     if (playerData[i].alive) {
                         client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[i].playerID}> HAS WON THE GAME!`);
+
                     }
                 }
                 EndGame();

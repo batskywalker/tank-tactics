@@ -19,7 +19,7 @@ const data = new SlashCommandBuilder()
         ));
 
 async function execute(interaction, playerData, actionQueue, bountyPoints) {
-    if (!playerData[0].started) {
+    if (!playerData.data.started) {
         interaction.reply({
             content: "Game hasn't started."
         });

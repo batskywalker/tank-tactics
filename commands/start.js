@@ -11,32 +11,34 @@ const data = new SlashCommandBuilder()
 .setDescription('Start the game.')
 
 async function execute(interaction, playerData) {
-    if (!playerData[0].started && interaction.user.id == '327298783526387713') {
-        playerData[0].started = true;
+    if (!playerData.data.started && interaction.user.id == '327298783526387713') {
+        playerData.data.started = true;
+        var playerArray = [];
 
-        for (var i = 1; i < playerData.length; i++) {
+        Object.keys(playerData).forEach(key => {
             var occupied = false;
-            var newX = Math.floor(Math.random() * playerData[0].width);
-            var newY = Math.floor(Math.random() * playerData[0].height);
+            var newX = Math.floor(Math.random() * playerData.data.width);
+            var newY = Math.floor(Math.random() * playerData.data.height);
 
             while (!occupied) {
-                for (var j = 1; j < playerData.length; j++) {
-                    if (newX == playerData[j].pos.x && newY == playerData[j].pos.y) {
-                        newX = Math.floor(Math.random() * playerData[0].width);
-                        newY = Math.floor(Math.random() * playerData[0].height);
+                Object.keys(playerData).forEach(newKey => {
+                    if (newX == playerData[newKey].pos.x && newY == playerData[newKey].pos.y) {
+                        newX = Math.floor(Math.random() * playerData.data.width);
+                        newY = Math.floor(Math.random() * playerData.data.height);
                     }
                     else {
                         occupied = true;
-                        playerData[i].pos.x = newX;
-                        playerData[i].pos.y = newY;
+                        playerData[key].pos.x = newX;
+                        playerData[key].pos.y = newY;
+                        playerArray.push(playerData[key]);
                     }
-                }
+                });
             }
-        }
+        });
         
         fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-        return ['Game has started!', playerData];
+        return ['Game has started!', playerArray];
     }
 
     return [false];

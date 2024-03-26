@@ -15,20 +15,18 @@ async function execute(interaction, playerData) {
         return [false];
     }
 
-    for (var i = 1; i < playerData.length; i++) {
-        if (interaction.user.id == playerData[i].playerID) {
-            delete playerData[i];
+    if (playerData[toString(interaction.user.id)]) {
+        delete playerData[toString(interaction.user.id)];
 
-            interaction.member.roles.remove('1190233509172891708');
+        interaction.member.roles.remove('1190233509172891708');
 
-            interaction.reply({
-                content: `<@${interaction.user.id}> has left the game.`
-            });
+        interaction.reply({
+            content: `<@${interaction.user.id}> has left the game.`
+        });
 
-            fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+        fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-            return [false];
-        }
+        return [false];
     }
 
     interaction.reply({

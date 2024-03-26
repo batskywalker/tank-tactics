@@ -32,8 +32,7 @@ async function execute(interaction, playerData, bountyPoints) {
         voted: false,
         votedFor: null,
         shots: 0,
-        bounty: false,
-        pointPos: 0
+        bounty: false
     };
 
     for (var i = 1; i < playerData.length; i++) {
@@ -46,23 +45,8 @@ async function execute(interaction, playerData, bountyPoints) {
         }
     }
 
-    var found = false;
-
-    for (var i = 0; i < bountyPoints.length; i++) {
-        if (interaction.user.id == bountyPoints[i].id) {
-            found = true;
-            player.pointPos = i;
-        }
-    }
-
-    if (!found) {
-        const tempBounty = {
-            playerID: interaction.user.id,
-            playerUser: interaction.user.username,
-            points: 100
-        };
-        player.pointPos = bountyPoints.length;
-        bountyPoints.push(tempBounty);
+    if (!bountyPoints[toString(interaction.user.id)]) {
+        
     }
 
     playerData.push(player);
