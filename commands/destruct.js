@@ -32,21 +32,21 @@ async function execute(interaction, playerData) {
     playerData[player].shown = false;
     playerData.data.amount_alive--;
     
-    Object.keys(playerData).forEach(key => {
-        // key is the potential victims id
-        if (playerData[key].alive && (playerData[key].pos.x >= playerData[player].pos.x - 2 && playerData[key].pos.x <= playerData[player].pos.x + 2) && (playerData[key].pos.y >= playerData[player].pos.y - 2 && playerData[key].pos.y <= playerData[player].pos.y + 2)) {
-            playerData[key].health -= playerData[player].health;
+    Object.keys(playerData).forEach(async curr => {
+        // curr is the potential victims id
+        if (playerData[curr].alive && (playerData[curr].pos.x >= playerData[player].pos.x - 2 && playerData[curr].pos.x <= playerData[player].pos.x + 2) && (playerData[curr].pos.y >= playerData[player].pos.y - 2 && playerData[curr].pos.y <= playerData[player].pos.y + 2)) {
+            playerData[curr].health -= playerData[player].health;
 
-            if (playerData[key].health <= 0) {
-                playerData[key].alive = false;
+            if (playerData[curr].health <= 0) {
+                playerData[curr].alive = false;
                 playerData.data.amount_alive--;
-                respMessage += `\n<@${playerData[key].playerID}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
+                respMessage += `\n<@${playerData[curr].playerID}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
             }
             else {
-                respMessage += `\n<@${playerData[key].playerID}, leaving them with ${playerData[key].health}!`;
+                respMessage += `\n<@${playerData[curr].playerID}, leaving them with ${playerData[curr].health}!`;
             }
             
-            response.push(playerData[key]);
+            response.push(playerData[curr]);
         }
     });
 

@@ -53,8 +53,8 @@ async function execute(interaction, playerData) {
         return [false];
     }
 
-    Object.keys(playerData).forEach(key => {
-        if (playerData[player].pos.x + direction[0] == playerData[key].pos.x && playerData[player].pos.y + direction[1] == playerData[key].pos.y) {
+    Object.keys(playerData).forEach(async curr => {
+        if (playerData[player].pos.x + direction[0] == playerData[curr].pos.x && playerData[player].pos.y + direction[1] == playerData[curr].pos.y) {
             return [false];
         }
     })

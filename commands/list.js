@@ -33,7 +33,7 @@ async function execute(interaction, playerData, actionQueue, bountyPoints) {
         for (var i = 0; i < actionQueue.length; i++) {
             for (var j = 0; j < actionQueue[i].length; j++) {
                 if (actionQueue[i][j].user.id == interaction.user.id) {
-                    
+                    result += `${actionQueue[i][j].commandName}`
                 }
             }
         }

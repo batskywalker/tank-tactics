@@ -15,22 +15,22 @@ async function execute(interaction, playerData) {
         playerData.data.started = true;
         var playerArray = [];
 
-        Object.keys(playerData).forEach(key => {
+        Object.keys(playerData).forEach(async player => {
             var occupied = false;
             var newX = Math.floor(Math.random() * playerData.data.width);
             var newY = Math.floor(Math.random() * playerData.data.height);
 
             while (!occupied) {
-                Object.keys(playerData).forEach(newKey => {
-                    if (newX == playerData[newKey].pos.x && newY == playerData[newKey].pos.y) {
+                Object.keys(playerData).forEach(async newPlayer => {
+                    if (newX == playerData[newPlayer].pos.x && newY == playerData[newPlayer].pos.y) {
                         newX = Math.floor(Math.random() * playerData.data.width);
                         newY = Math.floor(Math.random() * playerData.data.height);
                     }
                     else {
                         occupied = true;
-                        playerData[key].pos.x = newX;
-                        playerData[key].pos.y = newY;
-                        playerArray.push(playerData[key]);
+                        playerData[player].pos.x = newX;
+                        playerData[player].pos.y = newY;
+                        playerArray.push(playerData[player]);
                     }
                 });
             }
