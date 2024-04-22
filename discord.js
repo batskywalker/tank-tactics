@@ -94,7 +94,7 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-if (playerData[0].started) {
+if (playerData.data.started) {
     var playerArray = [];
     Object.keys(playerData).forEach(async player => {
         playerArray.push(playerData[player]);
@@ -259,6 +259,8 @@ client.on(Events.InteractionCreate, async interaction => {
             fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
         }
         else {
+            console.log(interaction);
+            console.log(interaction.options);
             await ExecuteCommand(interaction);
         }
     }

@@ -24,7 +24,7 @@ async function execute(interaction, playerData) {
     }
     
     const player = interaction.user.id;
-    const target = interaction.options._hoistedOptions[0].user.id;
+    const target = interaction.options._hoistedOptions[0].value;
     var reply;
 
     if (!playerData[player].alive || playerData[player].action <= 0) {

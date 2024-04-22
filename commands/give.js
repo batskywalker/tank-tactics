@@ -29,7 +29,7 @@ async function execute(interaction, playerData) {
     }
     
     var player = interaction.user.id;
-    var target = interaction.options._hoistedOptions[0].user.id;
+    var target = interaction.options._hoistedOptions[0].value;
     var amount = interaction.options._hoistedOptions[1].value;
 
     if (!playerData[player].alive) {
