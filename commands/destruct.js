@@ -14,7 +14,8 @@ async function execute(interaction, playerData) {
     var response = [``];
     if (!playerData.data.started) {
         interaction.reply({
-            content: "Actions can't be played right now."
+            content: "Actions can't be played right now.",
+            ephemeral: true
         });
         return [false];
     }

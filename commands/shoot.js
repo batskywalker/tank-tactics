@@ -18,7 +18,8 @@ option.setName('target')
 async function execute(interaction, playerData) {
     if (!playerData.data.started) {
         interaction.reply({
-            content: "Actions can't be played right now."
+            content: "Actions can't be played right now.",
+            ephemeral: true
         });
         return [false];
     }

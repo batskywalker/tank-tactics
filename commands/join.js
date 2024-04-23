@@ -31,6 +31,7 @@ async function execute(interaction, playerData, bountyPoints) {
         queue: 0,
         voted: false,
         votedFor: null,
+        bet: false,
         shots: 0,
         bounty: false
     };
@@ -48,7 +49,7 @@ async function execute(interaction, playerData, bountyPoints) {
     if (!bountyPoints[player]) {
         bountyPoints[player] = {};
         bountyPoints[player]['playerID'] = interaction.user.id;
-        bountyPoints[player]['playerUser'] = interaction.user.id;
+        bountyPoints[player]['playerUser'] = interaction.user.username;
         bountyPoints[player]['points'] = 100;
     }
 

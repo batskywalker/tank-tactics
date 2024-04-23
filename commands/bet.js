@@ -21,7 +21,13 @@ const data = new SlashCommandBuilder()
 );
 
 async function execute(interaction, playerData, bountyPoints, votes) {
-    
+    if (!playerData.data.started) {
+        interaction.reply({
+            content: "Bets can't be placed right now.",
+            ephemeral: true
+        });
+        return [false];
+    }
 }
 
 export default {data, execute};

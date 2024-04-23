@@ -467,7 +467,8 @@ async function GivePoints() {
                         const currPlayer = {
                             id: playerData[player].playerID,
                             username: playerData[player].user,
-                            votes: 1
+                            votes: 1,
+                            betters: []
                         };
 
                         newPoll[playerData[player].playerID] = currPlayer;
