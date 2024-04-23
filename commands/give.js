@@ -36,12 +36,10 @@ async function execute(interaction, playerData) {
     if (!playerData[player].alive) {
         return [false];
     }
-
-    if (playerData[player].action <= 0 || amount > playerData[player].action) {
+    else if (playerData[player].action <= 0 || amount > playerData[player].action) {
         return [false];
     }
-
-    if (!playerData[target]) {
+    else if (!playerData[target]) {
         return [false];
     }
     else if (player == target) {

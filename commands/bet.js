@@ -10,7 +10,7 @@ const data = new SlashCommandBuilder()
 .setName('bet')
 .setDescription('Bet who you think will get an extra point')
 .addUserOption(option =>
-    option.setName('player')
+    option.setName('target')
     .setDescription('The player you think will win')
     .setRequired(true)
 )
@@ -21,9 +21,27 @@ const data = new SlashCommandBuilder()
 );
 
 async function execute(interaction, playerData, bountyPoints, votes) {
-    if (!playerData.data.started) {
+    const player = interaction.user.id;
+    const target = interaction.options.getUser('target');
+    const amount = interaction.options.getInteger('amount');
+
+    if (!playerData.data.started || playerData[interaction.user.id].alive) {
         interaction.reply({
-            content: "Bets can't be placed right now.",
+            content: "You cannot place bets right now.",
+            ephemeral: true
+        });
+        return [false];
+    }
+    else if (playerData[interaction.user.id].bet) {
+        interaction.reply({
+            content: "You've already placed your bet.",
+            ephemeral: true
+        });
+        return [false];
+    }
+    else if (bountyPoints[player].points < amount || bountyPoints[player].points <= 0) {
+        interaction.reply({
+            content: "You don't have enough points.",
             ephemeral: true
         });
         return [false];
