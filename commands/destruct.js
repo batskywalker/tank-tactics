@@ -25,7 +25,7 @@ async function execute(interaction, playerData) {
         return [false];
     }
 
-    response[0] = `<@${playerData[player].playerID}> has self-destructed dealing ${playerData[player].health} damage to:`;
+    response[0] = `<@${player}> has self-destructed dealing ${playerData[player].health} damage to:`;
     response.push(playerData[player]);
     var respMessage = ``;
 
@@ -41,10 +41,10 @@ async function execute(interaction, playerData) {
             if (playerData[curr].health <= 0) {
                 playerData[curr].alive = false;
                 playerData.data.amount_alive--;
-                respMessage += `\n<@${playerData[curr].playerID}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
+                respMessage += `\n<@${curr}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
             }
             else {
-                respMessage += `\n<@${playerData[curr].playerID}, leaving them with ${playerData[curr].health}!`;
+                respMessage += `\n<@${curr}, leaving them with ${playerData[curr].health}!`;
             }
             
             response.push(playerData[curr]);

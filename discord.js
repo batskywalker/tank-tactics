@@ -444,19 +444,39 @@ async function GivePoints() {
                     if (votePool[random] && !playerData[votePool[random].id].alive) {
                         isGood = false;
                         var percent = (votePool[random].votes / maxVotes) * 100;
+                        var winner = votes[random].id;
 
-                        playerData[votePool[random].id].action += 1;
-                        client.channels.cache.get(process.env.CHANNELID).send(`With a ${percent.toFixed(1)}% chance of winning, <@${playerData[votePool[random].id].playerID}> has received an extra point!`);
+                        playerData[winner].action += 1;
+                        client.channels.cache.get(process.env.CHANNELID).send(`With a ${percent.toFixed(1)}% chance of winning, <@${winner}> has received an extra point!`);
+
+                        const ratio = 1 / (votes[winner].pool / votes.pool);
+                        var betResult = ``;
+                        
+                        for (var i = 0; i < votes[winner].bets.length; i++) {
+                            const better = votes[winner].bets[i].playerID;
+                            bountyPoints[better].points +=  ratio * votes[winner].bets[i].amount;
+
+                            betResult += `<@${better}>: ${votes[winner].bets[i].amount} points\nPoints Won: ${ratio * votes[winner].bets[i].amount - votes[winner].bets[i].amount}\nTotal Points: ${bountyPoints[better].points}\n\n`;
+                        }
+
+                        if (votes[winner].bets.length == 0) {
+                            betResult = `No bets placed on <@${winner}>`;
+                        }
+                        else {
+                            betResult = `Bets Placed on <@${winner}>:\n` + betResult;
+                        }
+
+                        client.channels.cache.get(process.env.CHANNELID).send(betResult);
                     }
                     else {
                         random = Math.floor(Math.random() * maxVotes);
-                                
                         break;
                     }
                 }
             }
 
             fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+            fs.writeFileSync(`${__dirname}\\commands\\bounty-points.json`, JSON.stringify(bountyPoints));
 
             if (playerData.data.amount_alive < playerData.data.max_alive) {
                 var buttons = [];
@@ -468,7 +488,8 @@ async function GivePoints() {
                             id: playerData[player].playerID,
                             username: playerData[player].user,
                             votes: 1,
-                            betters: []
+                            pool: 0,
+                            bets: []
                         };
 
                         newPoll[playerData[player].playerID] = currPlayer;
@@ -480,6 +501,8 @@ async function GivePoints() {
 
                         buttons.push(button);
                     }
+
+                    playerData[player].bet = false;
                 });
 
                 var rows = [];

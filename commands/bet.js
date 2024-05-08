@@ -25,14 +25,14 @@ async function execute(interaction, playerData, bountyPoints, votes) {
     const target = interaction.options.getUser('target');
     const amount = interaction.options.getInteger('amount');
 
-    if (!playerData.data.started || playerData[interaction.user.id].alive) {
+    if (!playerData.data.started || !playerData[player]) {
         interaction.reply({
-            content: "You cannot place bets right now.",
+            content: "You can't place bets right now.",
             ephemeral: true
         });
         return [false];
     }
-    else if (playerData[interaction.user.id].bet) {
+    else if (playerData[player].bet) {
         interaction.reply({
             content: "You've already placed your bet.",
             ephemeral: true
@@ -46,6 +46,35 @@ async function execute(interaction, playerData, bountyPoints, votes) {
         });
         return [false];
     }
+    else if (!playerData[target.id] || !playerData[target.id].alive) {
+        interaction.reply({
+            content: "Bets can't be placed on this player.",
+            ephemeral: true
+        });
+        return [false];
+    }
+
+    playerData[player].bet = true;
+
+    var newBet = {
+        playerID: player,
+        playerUser: playerData[player].playerUser,
+        amount: amount
+    };
+    votes[target.id].bets.push(newBet);
+    votes[target.id].pool += amount;
+    votes.pool += amount;
+    bountyPoints[player].points -= amount;
+
+    fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+    fs.writeFileSync(`${__dirname}\\bounty-points.json`, JSON.stringify(bountyPoints));
+    fs.writeFileSync(`${__dirname}\\votes.json`, JSON.stringify(votes));
+
+    interaction.reply({
+        content: `Thank you for placing your bet!\n${amount} points bet on ${target.username} to win the vote.\nCurrent point balance: ${bountyPoints[player].points}`,
+        ephemeral: true
+    });
+    return [false];
 }
 
 export default {data, execute};

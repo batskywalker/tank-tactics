@@ -32,7 +32,7 @@ async function execute(interaction, playerData) {
         return [false];
     }
 
-    if (!playerData[target] || playerData[player].playerID == playerData[target].playerID || !playerData[target].shown) {
+    if (!playerData[target] || player == target || !playerData[target].shown) {
         return [false];
     }
 
@@ -55,7 +55,7 @@ async function execute(interaction, playerData) {
 
                 if (!playerData[target].alive) {
                     playerData[target].shots++;
-                    reply = `<@${playerData[player].playerID}> has shot the wreckage of <@${playerData[target].playerID}>!`;
+                    reply = `<@${player}> has shot the wreckage of <@${target}>!`;
                 }
                 else if (playerData[target].health <= 0) {
                     playerData[target].alive = false;
@@ -63,16 +63,16 @@ async function execute(interaction, playerData) {
                     playerData[player].action += playerData[target].action;
 
                     if (playerData.data.amount_alive == 1) {
-                        reply = `<@${playerData[player].playerID}> has killed <@${playerData[target].playerID}>!\n<@${playerData[player].playerID}> HAS WON THE GAME!`;
+                        reply = `<@${player}> has killed <@${target}>!\n<@${player}> HAS WON THE GAME!`;
                         playerData.data.started = false;
                         playerData.data.amount_alive = 0;
                     }
                     else {
-                        reply = `<@${playerData[player].playerID}> has killed <@${playerData[target].playerID}>!\n${playerData.data.amount_alive} players remain!`;
+                        reply = `<@${player}> has killed <@${target}>!\n${playerData.data.amount_alive} players remain!`;
                     }
                 }
                 else {
-                    reply = `<@${playerData[player].playerID}> has shot <@${playerData[target].playerID}>!`;
+                    reply = `<@${player}> has shot <@${target}>!`;
                 }
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));

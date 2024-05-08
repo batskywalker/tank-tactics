@@ -11,6 +11,8 @@ const data = new SlashCommandBuilder()
 .setDescription('List actions')
 
 async function execute(interaction, playerData, actionQueue) {
+    const player = interaction.user.id;
+
     if (!playerData.data.started) {
         interaction.reply({
             content: "Game hasn't started.",
@@ -18,14 +20,14 @@ async function execute(interaction, playerData, actionQueue) {
         });
         return [false];
     }
-    else if (!playerData[interaction.user.id]) {
+    else if (!playerData[player]) {
         interaction.reply({
             content: "You're not in the game.",
             ephemeral: true
         });
         return [false];
     }
-    else if (!playerData[interaction.user.id].alive || playerData[interaction.user.id].queue <= 0) {
+    else if (!playerData[player].alive || playerData[player].queue <= 0) {
         interaction.reply({
             content: "You have no actions submitted",
             ephemeral: true
@@ -36,7 +38,7 @@ async function execute(interaction, playerData, actionQueue) {
     var result = '';
     for (var i = 0; i < actionQueue.length; i++) {
         for (var j = 0; j < actionQueue[i].length; j++) {
-            if (actionQueue[i][j].user.id == interaction.user.id) {
+            if (actionQueue[i][j].user.id == player) {
                 result += `${actionQueue[i][j].commandName}`;
 
                 for (var k = 0; k < actionQueue[i][j]._hoistedOptions.length; k++) {
@@ -52,6 +54,10 @@ async function execute(interaction, playerData, actionQueue) {
                 break;
             }
         }
+    }
+
+    if (!result) {
+        result = "You haven't submitted any actions.";
     }
 
     interaction.reply({

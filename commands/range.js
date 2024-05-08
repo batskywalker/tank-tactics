@@ -19,19 +19,19 @@ async function execute(interaction, playerData) {
         return [false];
     }
 
-    const id = interaction.user.id;
+    const player = interaction.user.id;
 
-    if (!playerData[id].alive) {
+    if (!playerData[player].alive) {
         return [false];
     }
     
-    if (playerData[id].action > 0) {
-        playerData[id].range += 1;
-        playerData[id].action -= 1;
+    if (playerData[player].action > 0) {
+        playerData[player].range += 1;
+        playerData[player].action -= 1;
 
         fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-        return [`<@${interaction.user.id}> has increased their shooting range.`, playerData[id]];
+        return [`<@${player}> has increased their shooting range.`, playerData[player]];
     }
     else {
         return [false];

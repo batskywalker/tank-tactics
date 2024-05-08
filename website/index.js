@@ -113,7 +113,7 @@ window.onload = function() {
                 for (const classes of current.classList) {
                     if (m < 2) {
                         pos[m] = parseInt(classes.slice(1), 10);
-                        m += 1;
+                        m++;
                     }
                 }
                 

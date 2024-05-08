@@ -33,19 +33,7 @@ async function execute(interaction, playerData) {
     var target = interaction.options._hoistedOptions[0].value;
     var amount = interaction.options._hoistedOptions[1].value;
 
-    if (!playerData[player].alive) {
-        return [false];
-    }
-    else if (playerData[player].action <= 0 || amount > playerData[player].action) {
-        return [false];
-    }
-    else if (!playerData[target]) {
-        return [false];
-    }
-    else if (player == target) {
-        return [false];
-    }
-    else if (!playerData[target].alive) {
+    if (!playerData[target] || !playerData[player].alive || playerData[player].action <= 0 || amount > playerData[player].action || player == target || !playerData[target].alive || amount <= 0) {
         return [false];
     }
 
@@ -55,7 +43,7 @@ async function execute(interaction, playerData) {
 
         fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
 
-        return [`<@${playerData[player].playerID}> has given <@${playerData[target].playerID}> ${amount} action points!`, playerData[player], playerData[target]];
+        return [`<@${player}> has given <@${target}> ${amount} action points!`, playerData[player], playerData[target]];
     }
 
     return [false];

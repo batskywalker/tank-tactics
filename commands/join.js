@@ -48,9 +48,10 @@ async function execute(interaction, playerData, bountyPoints) {
 
     if (!bountyPoints[player]) {
         bountyPoints[player] = {};
-        bountyPoints[player]['playerID'] = interaction.user.id;
         bountyPoints[player]['playerUser'] = interaction.user.username;
         bountyPoints[player]['points'] = 100;
+        bountyPoints[player]['won'] = 0; //most points won in a bet
+        bountyPoints[player]['lost'] = 0; // most points lost in a bet
     }
 
     playerData[player] = newPlayer;
