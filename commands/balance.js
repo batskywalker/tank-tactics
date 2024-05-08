@@ -74,5 +74,7 @@ async function execute(interaction, bountyPoints) {
             });
             return [false];
         }
+
+        
     }
 }
