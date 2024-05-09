@@ -75,6 +75,11 @@ async function execute(interaction, bountyPoints) {
             return [false];
         }
 
-        
+        interaction.reply({
+            content: `You have ${bountyPoints[player].points} points.`,
+            ephemeral: true
+        });
     }
 }
+
+export default {data, execute};
