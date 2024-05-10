@@ -35,9 +35,18 @@ async function sendData(response, data) {
 
 var playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
 var actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
-var poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+var votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
 var bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
 var bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));
+
+const exemptCommands = {
+    balance: true,
+    bet: true,
+    bounty: true,
+    odds: true,
+    actions: true,
+    remove: true
+}
 
 let sseResponse = [];
 
@@ -125,10 +134,15 @@ async function EndGame() {
         data: temp
     };
     actionQueue = [];
-    poll = []
+    votes = {
+        pool:0
+    };
+    bounties = {}
+
     fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
     fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
-    fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(poll));
+    fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(votes));
+    fs.writeFileSync(`${__dirname}\\commands\\bounties.json`, JSON.stringify(bounties));
 }
 
 async function Deadify(userID) {
@@ -149,8 +163,48 @@ async function ExecuteCommand(interaction) {
 
     try {
         playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
-        const tempData = await command.execute(interaction, playerData);
+        actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
+        votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+        bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
+        bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));
+        var tempData
+
+        switch (interaction.commandName) {
+            case "actions":
+                tempData = await command.execute(interaction, playerData, actionQueue);
+                break;
+            case "bounty":
+                tempData = await command.execute(interaction, playerData, bountyPoints, bounties);
+                break;
+            case "remove":
+                tempData = await command.execute(interaction, playerData, actionQueue, bounties, bountyPoints);
+                break;
+            case "odds":
+                tempData = await command.execute(interaction, votes);
+                break;
+            case "balance":
+                tempData = await command.execute(interaction, bountyPoints);
+                break;
+            case "bet":
+                tempData = await command.execute(interaction, playerData, bountyPoints, votes);
+                break;
+            case "shoot":
+                tempData = await command.execute(interaction, playerData, bountyPoints, bounties);
+                break;
+            case "destruct":
+                tempData = await command.execute(interaction, playerData, bountyPoints, bounties);
+                break;
+            case "join":
+                tempData = await command.execute(interaction, playerData, bountyPoints);
+                break;
+            default:
+                tempData = await command.execute(interaction, playerData);
+        }
         playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+        actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
+        votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+        bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
+        bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));
 
         const reply = await tempData.shift();
 
@@ -213,7 +267,12 @@ client.on("messageCreate", async (msg) => {
 client.on(Events.InteractionCreate, async interaction => {
     var player = interaction.user.id;
     if (interaction.isChatInputCommand()) {
-        if (playerData.data.started) {
+        if (exemptCommands[interaction.commandName]) {
+            console.log(interaction);
+            console.log(interaction.options);
+            await ExecuteCommand(interaction);
+        }
+        else if (playerData.data.started) {
             var shortInteraction = {};
 
             if (!playerData[player]) {
@@ -266,7 +325,7 @@ client.on(Events.InteractionCreate, async interaction => {
     }
     else if (interaction.isButton()) {
         const button = interaction.component.customId;
-        poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+        votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
         if (playerData[player]) {
             if (!playerData[player].voted) {
                 if (playerData[player].votedFor == interaction.component.customId) {
@@ -277,21 +336,24 @@ client.on(Events.InteractionCreate, async interaction => {
                     return;
                 }
 
-                poll[button].votes += 1;
+                votes[button].votes += 1;
                 playerData[player].voted = true;
                 playerData[player].votedFor = interaction.component.customId;
 
                 // Sort list of votees by most votes
-                /*for (var k = j; k > 0; k--) {
-                    if (poll[k].votes > poll[k - 1].votes) {
-                        var temp1 = poll[k - 1];
-                        var temp2 = poll[k];
+                /*
+                for (var j = 0; j < votes.length; j++) {
+                    for (var k = j; k > 0; k--) {
+                        if (votes[k].votes > votes[k - 1].votes) {
+                            var temp1 = votes[k - 1];
+                            var temp2 = votes[k];
 
-                        poll[k - 1] = temp2;
-                        poll[k] = temp1;
-                    }
-                    else {
-                        break;
+                            votes[k - 1] = temp2;
+                            votes[k] = temp1;
+                        }
+                        else {
+                            break;
+                        }
                     }
                 }*/
 
@@ -300,7 +362,7 @@ client.on(Events.InteractionCreate, async interaction => {
                     ephemeral: true
                 });
 
-                fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(poll));
+                fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(votes));
                 fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
             }
             else {
@@ -357,11 +419,15 @@ async function GivePoints() {
                                 playerData[target].alive = false;
                                 await Deadify(playerData[target].playerID);
                                 playerData.data.amount_alive--;
+                                if (bounties[target]) {
+                                    playerData[bounties[target].playerID].bounty = false;
+                                    delete bounties[target];
+                                }
 
-                                client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[target].playerID}> got blown up by the wreckage of <@${playerData[player].playerID}>!\n${playerData.data.amount_alive} players left!`);
+                                client.channels.cache.get(process.env.CHANNELID).send(`<@${target}> got blown up by the wreckage of <@${player}>!\n${playerData.data.amount_alive} players left!`);
                             }
                             else {
-                                client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[target].playerID}> got damaged by the wreckage of <@${playerData[player].playerID}>!`);
+                                client.channels.cache.get(process.env.CHANNELID).send(`<@${target}> got damaged by the wreckage of <@${player}>!`);
                             }
                         }
                     });
@@ -387,6 +453,7 @@ async function GivePoints() {
                 Object.keys(playerData).forEach(async player => {
                     if (playerData[player].alive) {
                         client.channels.cache.get(process.env.CHANNELID).send(`<@${playerData[player].playerID}> HAS WON THE GAME!`);
+                        bountyPoints[player].points += 1000;
                     }
                 });
                 EndGame();
@@ -398,17 +465,17 @@ async function GivePoints() {
                 return;
             }
             
-            client.channels.cache.get(process.env.CHANNELID).send('<@&1190233509172891708>\nEveryone has received an action point!');
+            client.channels.cache.get(process.env.CHANNELID).send('<@&1190233509172891708>\nEveryone has received an action point!\n\n');
 
-            poll = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+            votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
             //const highest = [];
 
-            if (playerData.data.amount_alive < playerData.data.max_alive && Object.keys(poll).length > 0) {
-                /*if (poll[0].votes > 0) {
-                    highest.push(poll[0]);
-                    for (var i = 1; i < poll.length; i++) {
-                        if (poll[i].votes == poll[0].votes) {
-                            highest.push(poll[i]);
+            if (playerData.data.amount_alive < playerData.data.max_alive && Object.keys(votes).length > 0) {
+                /*if (votes[0].votes > 0) {
+                    highest.push(votes[0]);
+                    for (var i = 1; i < votes.length; i++) {
+                        if (votes[i].votes == votes[0].votes) {
+                            highest.push(votes[i]);
                         }
                         else {
                             break;
@@ -427,12 +494,10 @@ async function GivePoints() {
                 var votePool = [];
                 var maxVotes = 0;
 
-                Object.keys(playerData).forEach(async votee => {
-                    if (poll[votee].votes) {
-                        for (var j = 0; j < poll[votee].votes; j++) {
-                            votePool.push(poll[votee]);
-                            maxVotes++;
-                        }
+                Object.keys(votes).forEach(async votee => {
+                    for (var j = 0; j < votes[votee].votes; j++) {
+                        votePool.push(votes[votee]);
+                        maxVotes++;
                     }
                 });
 
@@ -449,18 +514,23 @@ async function GivePoints() {
                         playerData[winner].action += 1;
                         client.channels.cache.get(process.env.CHANNELID).send(`With a ${percent.toFixed(1)}% chance of winning, <@${winner}> has received an extra point!`);
 
-                        const ratio = 1 / (votes[winner].pool / votes.pool);
+                        const ratio = 1.0 / ((votes[winner].pool + 1.0) / (votes.pool + 1.0));
                         var betResult = ``;
                         
                         for (var i = 0; i < votes[winner].bets.length; i++) {
-                            const better = votes[winner].bets[i].playerID;
-                            bountyPoints[better].points +=  ratio * votes[winner].bets[i].amount;
+                            const better = votes[winner].bets[i];
+                            bountyPoints[better.playerID].points +=  Math.ceil(ratio * better.amount);
+                            bountyPoints[better.playerID].maybe = 0;
 
-                            betResult += `<@${better}>: ${votes[winner].bets[i].amount} points\nPoints Won: ${ratio * votes[winner].bets[i].amount - votes[winner].bets[i].amount}\nTotal Points: ${bountyPoints[better].points}\n\n`;
+                            if (Math.ceil(ratio * better.amount) > bountyPoints[better.playerID].won) {
+                                bountyPoints[better.playerID].won = Math.ceil(ratio * better.amount);
+                            }
+
+                            betResult += `<@${better.playerID}>: ${better.amount} points\nPoints Won: ${Math.ceil(ratio * better.amount - better.amount)}\nTotal Points: ${bountyPoints[better.playerID].points}\n\n`;
                         }
 
                         if (votes[winner].bets.length == 0) {
-                            betResult = `No bets placed on <@${winner}>`;
+                            betResult = `No bets placed on <@${winner}>\n\n`;
                         }
                         else {
                             betResult = `Bets Placed on <@${winner}>:\n` + betResult;
@@ -475,33 +545,36 @@ async function GivePoints() {
                 }
             }
 
-            fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
-            fs.writeFileSync(`${__dirname}\\commands\\bounty-points.json`, JSON.stringify(bountyPoints));
-
             if (playerData.data.amount_alive < playerData.data.max_alive) {
                 var buttons = [];
-                var newPoll = [];
+                var newPoll = {
+                    pool: 0
+                };
                 
                 Object.keys(playerData).forEach(async player => {
                     if (playerData[player].alive) {
                         const currPlayer = {
-                            id: playerData[player].playerID,
-                            username: playerData[player].user,
+                            id: player,
+                            playerUser: playerData[player].playerUser,
                             votes: 1,
                             pool: 0,
                             bets: []
                         };
 
-                        newPoll[playerData[player].playerID] = currPlayer;
+                        newPoll[player] = currPlayer;
 
                         const button = new ButtonBuilder()
-                        .setLabel(playerData[player].playerUser)
+                        .setLabel(currPlayer.playerUser)
                         .setStyle(ButtonStyle.Secondary)
-                        .setCustomId(currPlayer.id);
+                        .setCustomId(player);
 
                         buttons.push(button);
                     }
 
+                    if (playerData[player].bet && bountyPoints[player].maybe > bountyPoints[player].lost) {
+                        bountyPoints[player].lost = bountyPoints[player].maybe;
+                        bountyPoints[player].maybe = 0;
+                    }
                     playerData[player].bet = false;
                 });
 
@@ -527,13 +600,37 @@ async function GivePoints() {
                     tempArr = [];
                 }
 
-                fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(newPoll));
-
                 client.channels.cache.get(process.env.DEADCHANNELID).send({
                     content: '<@&1190234100137742386> Vote for who you want to receive an extra point tomorrow.\n',
                     components: rows
                 });
             }
+
+            if (Object.keys[bounties].length > 0) {
+                var bountyResult = 'Active Bounties:\n\n';
+                Object.keys(bounties).forEach(bounty => {
+                    if (!bounties[bounty].active) {
+                        bounties[bounty].active = true;
+                    }
+
+                    bountyResult += `<@${bounty}>\nReward:\n`;
+
+                    Object.keys(bounties[bounty].rewards).forEach(reward => {
+                        bountyResult += `${bounties[bounty].rewards[reward]} ${reward}\n`;
+                    });
+                    bountyResult += '\n';
+                });
+
+                client.channels.cache.get(process.env.CHANNELID).send(bountyResult);
+            }
+            else {
+                client.channels.cache.get(process.env.CHANNELID).send("There are no active bounties.");
+            }
+
+            fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
+            fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(newPoll));
+            fs.writeFileSync(`${__dirname}\\commands\\bounty-points.json`, JSON.stringify(bountyPoints));
+            fs.writeFileSync(`${__dirname}\\commands\\bounties.json`, JSON.stringify(bounties));
 
             var playerArray = [];
             Object.keys(playerData).forEach(async player => {

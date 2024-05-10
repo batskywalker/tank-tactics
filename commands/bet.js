@@ -53,6 +53,13 @@ async function execute(interaction, playerData, bountyPoints, votes) {
         });
         return [false];
     }
+    else if (Object.keys(votes).length <= 1) {
+        interaction.reply({
+            content: "Bets aren't open right now",
+            ephemeral: true
+        });
+        return [false];
+    }
 
     playerData[player].bet = true;
 
@@ -65,6 +72,7 @@ async function execute(interaction, playerData, bountyPoints, votes) {
     votes[target.id].pool += amount;
     votes.pool += amount;
     bountyPoints[player].points -= amount;
+    bountyPoints[player].maybe = amount;
 
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
     fs.writeFileSync(`${__dirname}\\bounty-points.json`, JSON.stringify(bountyPoints));

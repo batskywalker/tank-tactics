@@ -14,40 +14,20 @@ const data = new SlashCommandBuilder()
         .setDescription('The player you want your bounty to be on')
         .setRequired(true)
 )
-.addSubcommand(subcommand =>
-    subcommand
-        .setName('actions')
-        .setDescription('A bounty reward of action points')
-        .addIntegerOption(option =>
-            option.setName('amount')
-            .setDescription('1 action point = 100 bounty points')
-            .setRequired(true)
-        )
-)
-.addSubcommand(subcommand =>
-    subcommand
-        .setName('health')
-        .setDescription('A bounty reward of health points')
-        .addIntegerOption(option =>
-            option.setName('amount')
-            .setDescription('1 health point = 1000 bounty points')
-            .setRequired(true)
-        )
-)
-.addSubcommand(subcommand =>
-    subcommand
-        .setName('points')
-        .setDescription('A bounty reward of bounty points')
-        .addIntegerOption(option =>
-            option.setName('amount')
-            .setDescription('The amount of bounty points')
-            .setRequired(true)
-        )
+.addStringOption(option =>
+    option.setName('reward')
+    .setDescription('A reward of bounty points, health, or actions points')
+    .setRequired(true)
+    .addChoices(
+        {name: 'action', value: 'action'},
+        {name: 'health', value: 'health'},
+        {name: 'points', value: 'points'}
+    )
 )
 
 async function execute(interaction, playerData, bountyPoints, bounties) {
     const player = interaction.user.id;
-    const subcommand = interaction.options.getSubcommand();
+    const reward = interaction.options.getString('reward');
     const target = interaction.options.getUser('target');
     const amount = interaction.options.getInteger('amount');
     var cost;
@@ -92,17 +72,18 @@ async function execute(interaction, playerData, bountyPoints, bounties) {
         targetUser: target.username,
         playerID: player,
         playerUser: playerData[player].playerUser,
+        total: 0,
         active: false,
         rewards: {}
     };
 
 
-    switch (subcommand) {
+    switch (reward) {
         case "actions":
-            cost = amount * 100;
+            cost = amount * 500;
             break;
         case "health":
-            cost = amount * 1000;
+            cost = amount * 5000;
             break;
         case "bounties":
             cost = amount;
@@ -123,15 +104,17 @@ async function execute(interaction, playerData, bountyPoints, bounties) {
     playerData[player].bounty = true;
 
     if (bounties[target.id]) {
-        if (bounties[target.id].rewards[subcommand]) {
-            bounties[target.id].rewards[subcommand] += amount;
+        if (bounties[target.id].rewards[reward]) {
+            bounties[target.id].rewards[reward] += amount;
         }
         else {
-            bounties[target.id].rewards[subcommand] = amount;
+            bounties[target.id].rewards[reward] = amount;
         }
+        bounties[target.id].total += cost;
     }
     else {
-        newBounty.rewards[subcommand] = amount;
+        newBounty.rewards[reward] = amount;
+        newBounty.total = cost;
         bounties[target.id] = newBounty;
     }
 

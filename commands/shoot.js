@@ -15,7 +15,7 @@ option.setName('target')
 .setRequired(true)    
 );
 
-async function execute(interaction, playerData) {
+async function execute(interaction, playerData, bountyPoints, bounties) {
     if (!playerData.data.started) {
         interaction.reply({
             content: "Actions can't be played right now.",
@@ -62,20 +62,53 @@ async function execute(interaction, playerData) {
                     playerData.data.amount_alive -= 1;
                     playerData[player].action += playerData[target].action;
 
-                    if (playerData.data.amount_alive == 1) {
-                        reply = `<@${player}> has killed <@${target}>!\n<@${player}> HAS WON THE GAME!`;
-                        playerData.data.started = false;
-                        playerData.data.amount_alive = 0;
+                    if (bounties[target]) {
+                        if (bounties[target].active) {
+                            if (bounties[target].playerID == player) {
+                                bountyPoints[player].points += bounties[target].total;
+                            }
+                            Object.keys(bounties[target].rewards).forEach(reward => {
+                                if (reward == "points") {
+                                    bountyPoints[player].points += bounties[target].rewards[reward];
+                                }
+                                else {
+                                    playerData[player][reward] += bounties[target].rewards[reward];
+                                }
+                            });
+
+                            if (playerData.data.amount_alive == 1) {
+                                reply = `<@${player}> has killed <@${target}> and collected their bounty!\n<@${player}> HAS WON THE GAME!`;
+                                bountyPoints[player].points += 1000;
+                                playerData.data.started = false;
+                                playerData.data.amount_alive = 0;
+                            }
+                            else {
+                                reply = `<@${player}> has killed <@${target}> and collected their bounty!\n${playerData.data.amount_alive} players remain!`;
+                            }
+                        }
+                        playerData[bounties[target].playerID].bounty = false;
+                        delete bounties[target];
                     }
                     else {
-                        reply = `<@${player}> has killed <@${target}>!\n${playerData.data.amount_alive} players remain!`;
+                        if (playerData.data.amount_alive == 1) {
+                            reply = `<@${player}> has killed <@${target}>!\n<@${player}> HAS WON THE GAME!`;
+                            bountyPoints[player].points += 1000;
+                            playerData.data.started = false;
+                            playerData.data.amount_alive = 0;
+                        }
+                        else {
+                            reply = `<@${player}> has killed <@${target}>!\n${playerData.data.amount_alive} players remain!`;
+                        }
                     }
+                    
                 }
                 else {
                     reply = `<@${player}> has shot <@${target}>!`;
                 }
 
                 fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+                fs.writeFileSync(`${__dirname}\\bounties.json`, JSON.stringify(bounties));
+                fs.writeFileSync(`${__dirname}\\bounty-points.json`, JSON.stringify(bountyPoints));
 
                 return [reply, playerData[player], playerData[target]];
             }

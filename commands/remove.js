@@ -19,7 +19,7 @@ const data = new SlashCommandBuilder()
         ));
 
 async function execute(interaction, playerData, actionQueue, bounties, bountyPoints) {
-    
+    return [false];
 }
 
 export default {data, execute};

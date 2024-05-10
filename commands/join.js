@@ -52,6 +52,7 @@ async function execute(interaction, playerData, bountyPoints) {
         bountyPoints[player]['points'] = 100;
         bountyPoints[player]['won'] = 0; //most points won in a bet
         bountyPoints[player]['lost'] = 0; // most points lost in a bet
+        bountyPoints[player]['maybe'] = 0;
     }
 
     playerData[player] = newPlayer;
@@ -61,6 +62,7 @@ async function execute(interaction, playerData, bountyPoints) {
     interaction.member.roles.add('1190233509172891708');
 
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+    fs.writeFileSync(`${__dirname}\\bounty-points.json`, JSON.stringify(bountyPoints));
 
     interaction.reply({
         content: `<@${interaction.user.id}> has joined!`

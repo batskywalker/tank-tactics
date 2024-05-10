@@ -10,7 +10,7 @@ const data = new SlashCommandBuilder()
 .setName('destruct')
 .setDescription('Blow yourself up and anyone else within 2 squares of you.')
 
-async function execute(interaction, playerData) {
+async function execute(interaction, playerData, bountyPoints, bounties) {
     var response = [``];
     if (!playerData.data.started) {
         interaction.reply({
@@ -23,6 +23,11 @@ async function execute(interaction, playerData) {
     const player = interaction.user.id;
     if (!playerData[player].alive) {
         return [false];
+    }
+
+    if (bounties[player]) {
+        playerData[bounties[player].playerID].bounty = false;
+        delete bounties[player];
     }
 
     response[0] = `<@${player}> has self-destructed dealing ${playerData[player].health} damage to:`;
@@ -42,6 +47,14 @@ async function execute(interaction, playerData) {
                 playerData[curr].alive = false;
                 playerData.data.amount_alive--;
                 respMessage += `\n<@${curr}>, leaving them with 0 health! ${playerData[0].amount_alive} players remain!`;
+
+                if (bounties[curr]) {
+                    if (bounties[curr].active) {
+                        bountyPoints[player].points += bounties[curr].total;
+                    }
+                    playerData[bounties[curr].playerID].bounty = false;
+                    delete bounties[curr];
+                }
             }
             else {
                 respMessage += `\n<@${curr}, leaving them with ${playerData[curr].health}!`;
@@ -56,6 +69,8 @@ async function execute(interaction, playerData) {
     }
 
     fs.writeFileSync(`${__dirname}\\player-data.json`, JSON.stringify(playerData));
+    fs.writeFileSync(`${__dirname}\\bounties.json`, JSON.stringify(bounties));
+    fs.writeFileSync(`${__dirname}\\bounty-points.json`, JSON.stringify(bountyPoints));
 
     return response;
 }
