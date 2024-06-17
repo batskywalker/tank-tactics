@@ -52,7 +52,7 @@ async function execute(interaction, bountyPoints) {
             const posSize = Math.max(Math.floor(Math.log10(Math.abs(i))), 0) + 1;
 
             
-            loopResult += `${i}  ${pos[i].playerUser}`;
+            loopResult += `${i + 1}  ${pos[i].playerUser}`;
 
             for (var j = 0; j < 25 - ((pos[i].playerUser.length - 1) + (pointSize - 1) + (posSize - 1)); j++) {
                 loopResult += ' ';

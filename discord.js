@@ -257,6 +257,8 @@ client.on("messageCreate", async (msg) => {
                         for (const response of sseResponse) {
                             await sendData(response, JSON.stringify(playerData[theUser.user.id]));
                         }
+
+                    //msg.reply(theUser.user.avatar);
                     }
                 }
             });
@@ -328,7 +330,7 @@ client.on(Events.InteractionCreate, async interaction => {
         votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
         if (playerData[player]) {
             if (!playerData[player].voted) {
-                if (playerData[player].votedFor == interaction.component.customId) {
+                if (playerData[player].votedFor == button) {
                     interaction.reply({
                         content: "You voted for that player yesterday, please change your vote.",
                         ephemeral: true
@@ -338,7 +340,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
                 votes[button].votes += 1;
                 playerData[player].voted = true;
-                playerData[player].votedFor = interaction.component.customId;
+                playerData[player].votedFor = button;
 
                 // Sort list of votees by most votes
                 /*
@@ -387,7 +389,7 @@ async function GivePoints() {
     var theDate = new Date;
 
     // Check that the game is running and if its noon
-    if (theDate.getHours() == 12 && playerData.data.started) {
+    if (theDate.getHours() == 18 && playerData.data.started) {
         if (!pointsGiven) { // The points haven't been given yet
             pointsGiven = true;
             actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
@@ -404,49 +406,54 @@ async function GivePoints() {
             fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
 
             Object.keys(playerData).forEach(async player => {
-                // Blow up all hit dead players
-                const currPos = playerData[player].pos;
-                const currRange = playerData[player].shots;
+                if (player != "data") {
+                    // Blow up all hit dead players
+                    const currPos = playerData[player].pos;
+                    const currRange = playerData[player].shots;
 
-                if (playerData[player].shown && !playerData[player].alive && playerData[player].shots > 0) {
-                    Object.keys(playerData).forEach(async target => {
-                        const targPos = playerData[target].pos;
+                    if (playerData[player].shown && !playerData[player].alive && playerData[player].shots > 0) {
+                        Object.keys(playerData).forEach(async target => {
+                            if (target != "data") {
+                                const targPos = playerData[target].pos;
 
-                        if (playerData[target].alive && (targPos.x >= currPos.x - currRange && targPos.x <= currPos.x + currRange) && (targPos.y >= currPos.y - currRange && targPos.y <= currPos.y + currRange)) {
-                            playerData[target].health--;
+                                if (playerData[target].alive && (targPos.x >= currPos.x - currRange && targPos.x <= currPos.x + currRange) && (targPos.y >= currPos.y - currRange && targPos.y <= currPos.y + currRange)) {
+                                    playerData[target].health--;
 
-                            if (playerData[target].health <= 0) {
-                                playerData[target].alive = false;
-                                await Deadify(playerData[target].playerID);
-                                playerData.data.amount_alive--;
-                                if (bounties[target]) {
-                                    playerData[bounties[target].playerID].bounty = false;
-                                    delete bounties[target];
+                                    if (playerData[target].health <= 0) {
+                                        playerData[target].alive = false;
+                                        await Deadify(playerData[target].playerID);
+                                        playerData.data.amount_alive--;
+                                        if (bounties[target]) {
+                                            playerData[bounties[target].playerID].bounty = false;
+                                            delete bounties[target];
+                                        }
+
+                                        client.channels.cache.get(process.env.CHANNELID).send(`<@${target}> got blown up by the wreckage of <@${player}>!\n${playerData.data.amount_alive} players left!`);
+                                    }
+                                    else {
+                                        client.channels.cache.get(process.env.CHANNELID).send(`<@${target}> got damaged by the wreckage of <@${player}>!`);
+                                    }
                                 }
-
-                                client.channels.cache.get(process.env.CHANNELID).send(`<@${target}> got blown up by the wreckage of <@${player}>!\n${playerData.data.amount_alive} players left!`);
                             }
-                            else {
-                                client.channels.cache.get(process.env.CHANNELID).send(`<@${target}> got damaged by the wreckage of <@${player}>!`);
-                            }
-                        }
-                    });
+                        });
 
-                    playerData[player].shown = false;
-                }
-
-                //add actions and reset player data
-                if (playerData[player].alive) {
-                    playerData[player].action++;
-                }
-                else {
-                    if (!playerData[player].voted) {
-                        playerData[player].votedFor = null;
+                        playerData[player].shown = false;
                     }
-                }
+                
 
-                playerData[player].queue = 0;
-                playerData[player].voted = false;
+                    //add actions and reset player data
+                    if (playerData[player].alive) {
+                        playerData[player].action++;
+                    }
+                    else {
+                        if (!playerData[player].voted) {
+                            playerData[player].votedFor = null;
+                        }
+                    }
+
+                    playerData[player].queue = 0;
+                    playerData[player].voted = false;
+                }
             });
 
             if (playerData.data.amount_alive == 1) {
@@ -495,9 +502,11 @@ async function GivePoints() {
                 var maxVotes = 0;
 
                 Object.keys(votes).forEach(async votee => {
-                    for (var j = 0; j < votes[votee].votes; j++) {
-                        votePool.push(votes[votee]);
-                        maxVotes++;
+                    if (votee != "pool") {
+                        for (var j = 0; j < votes[votee].votes; j++) {
+                            votePool.push(votes[votee]);
+                            maxVotes++;
+                        }
                     }
                 });
 
@@ -506,10 +515,10 @@ async function GivePoints() {
                 var isGood = true;
 
                 while(isGood) {
-                    if (votePool[random] && !playerData[votePool[random].id].alive) {
+                    if (votePool[random] && playerData[votePool[random].id].alive) {
                         isGood = false;
                         var percent = (votePool[random].votes / maxVotes) * 100;
-                        var winner = votes[random].id;
+                        var winner = votePool[random].id;
 
                         playerData[winner].action += 1;
                         client.channels.cache.get(process.env.CHANNELID).send(`With a ${percent.toFixed(1)}% chance of winning, <@${winner}> has received an extra point!`);
@@ -540,7 +549,6 @@ async function GivePoints() {
                     }
                     else {
                         random = Math.floor(Math.random() * maxVotes);
-                        break;
                     }
                 }
             }
@@ -578,6 +586,8 @@ async function GivePoints() {
                     playerData[player].bet = false;
                 });
 
+                fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(newPoll));
+
                 var rows = [];
                 var tempArr = [];
 
@@ -606,29 +616,28 @@ async function GivePoints() {
                 });
             }
 
-            if (Object.keys[bounties].length > 0) {
-                var bountyResult = 'Active Bounties:\n\n';
-                Object.keys(bounties).forEach(bounty => {
-                    if (!bounties[bounty].active) {
-                        bounties[bounty].active = true;
-                    }
+            var bountyResult = '';
+            Object.keys(bounties).forEach(bounty => {
+                if (!bounties[bounty].active) {
+                    bounties[bounty].active = true;
+                }
 
-                    bountyResult += `<@${bounty}>\nReward:\n`;
+                bountyResult += `<@${bounty}>\nReward:\n`;
 
-                    Object.keys(bounties[bounty].rewards).forEach(reward => {
-                        bountyResult += `${bounties[bounty].rewards[reward]} ${reward}\n`;
-                    });
-                    bountyResult += '\n';
+                Object.keys(bounties[bounty].rewards).forEach(reward => {
+                    bountyResult += `${bounties[bounty].rewards[reward]} ${reward}\n`;
                 });
+                bountyResult += '\n';
+            });
 
-                client.channels.cache.get(process.env.CHANNELID).send(bountyResult);
+            if (bountyResult) {
+                client.channels.cache.get(process.env.CHANNELID).send('Active Bounties:\n\n' + bountyResult);
             }
             else {
                 client.channels.cache.get(process.env.CHANNELID).send("There are no active bounties.");
             }
 
             fs.writeFileSync(`${__dirname}\\commands\\player-data.json`, JSON.stringify(playerData));
-            fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(newPoll));
             fs.writeFileSync(`${__dirname}\\commands\\bounty-points.json`, JSON.stringify(bountyPoints));
             fs.writeFileSync(`${__dirname}\\commands\\bounties.json`, JSON.stringify(bounties));
 

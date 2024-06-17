@@ -40,9 +40,8 @@ async function execute(interaction, playerData, actionQueue) {
         for (var j = 0; j < actionQueue[i].length; j++) {
             if (actionQueue[i][j].user.id == player) {
                 result += `${actionQueue[i][j].commandName}`;
-
-                for (var k = 0; k < actionQueue[i][j]._hoistedOptions.length; k++) {
-                    if (actionQueue[i][j]._hoistedOptions[k].user) {
+                for (var k = 0; k < actionQueue[i][j].options._hoistedOptions.length; k++) {
+                    if (actionQueue[i][j].options._hoistedOptions[k].user) {
                         result += ` ${actionQueue[i][j].options._hoistedOptions[k].user.username}`;
                     }
                     else {

@@ -24,6 +24,11 @@ const data = new SlashCommandBuilder()
         {name: 'points', value: 'points'}
     )
 )
+.addIntegerOption(option =>
+    option.setName('amount')
+    .setDescription('How much of this to place on their head')
+    .setRequired(true)
+);
 
 async function execute(interaction, playerData, bountyPoints, bounties) {
     const player = interaction.user.id;

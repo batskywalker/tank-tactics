@@ -1,9 +1,9 @@
 window.onload = function() {
     const gameBoard = document.getElementById("whole-board");
-    for (var i = 0; i < 35; i++) {
+    for (var i = 0; i < 30; i++) {
         let row = document.createElement("tr");
         gameBoard.appendChild(row);
-        for (var j = 0; j < 35; j++) {
+        for (var j = 0; j < 30; j++) {
             let cell = document.createElement("td");
             cell.classList.add(`y${i}`);
             cell.classList.add(`x${j}`);
@@ -124,7 +124,7 @@ window.onload = function() {
                         var row = pos[0] + (attackDirection[i][1] * j);
                         var col = pos[1] + (attackDirection[i][0] * j);
 
-                        if (row >= 0 && row < 35 && col >= 0 && col < 35) {
+                        if (row >= 0 && row < 30 && col >= 0 && col < 30) {
                             //current.children[1].children[0].children[3].textContent += row;
                             //current.children[1].children[0].children[3].textContent += col;
                             var beingAttacked = gameBoard.children[row].children[col];
