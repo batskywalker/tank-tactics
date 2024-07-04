@@ -389,7 +389,7 @@ async function GivePoints() {
     var theDate = new Date;
 
     // Check that the game is running and if its noon
-    if (theDate.getHours() == 18 && playerData.data.started) {
+    if (theDate.getHours() == 23 && playerData.data.started) {
         if (!pointsGiven) { // The points haven't been given yet
             pointsGiven = true;
             actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
