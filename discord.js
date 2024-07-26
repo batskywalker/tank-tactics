@@ -200,11 +200,16 @@ async function ExecuteCommand(interaction) {
             default:
                 tempData = await command.execute(interaction, playerData);
         }
-        playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+        /*playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
         actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
         votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
         bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
-        bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));
+        bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));*/
+        
+        actionQueue = null;
+        votes = null;
+        bountyPoints = null;
+        bounties = null;
 
         const reply = await tempData.shift();
 
@@ -229,6 +234,8 @@ async function ExecuteCommand(interaction) {
                 EndGame();
             }
         }
+
+        playerData = null;
     }
     catch (error) {
         console.log(error);
@@ -263,10 +270,14 @@ client.on("messageCreate", async (msg) => {
                 }
             });
         });
+
+        playerData = null;
     }
 })
 
 client.on(Events.InteractionCreate, async interaction => {
+    playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+
     var player = interaction.user.id;
     if (interaction.isChatInputCommand()) {
         if (exemptCommands[interaction.commandName]) {
@@ -283,6 +294,7 @@ client.on(Events.InteractionCreate, async interaction => {
                     ephemeral: true
                 });
                 console.log(interaction);
+                playerData = null;
                 return;
                 
             }
@@ -292,6 +304,7 @@ client.on(Events.InteractionCreate, async interaction => {
                     content: "You're dead.",
                     ephemeral: true
                 });
+                playerData = null;
                 return;
             }
 
@@ -335,6 +348,8 @@ client.on(Events.InteractionCreate, async interaction => {
                         content: "You voted for that player yesterday, please change your vote.",
                         ephemeral: true
                     });
+                    playerData = null;
+                    votes = null;
                     return;
                 }
 
@@ -381,15 +396,20 @@ client.on(Events.InteractionCreate, async interaction => {
             });
         }
     }
+
+    playerData = null;
+    votes = null;
+    actionQueue = null;
 });
 
 var pointsGiven = false;
 
 async function GivePoints() {
     var theDate = new Date;
+    playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
 
     // Check that the game is running and if its noon
-    if (theDate.getHours() == 23 && playerData.data.started) {
+    if (theDate.getHours() == 12 && playerData.data.started) {
         if (!pointsGiven) { // The points haven't been given yet
             pointsGiven = true;
             actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
@@ -404,6 +424,7 @@ async function GivePoints() {
             // Reset the queue
             actionQueue = [];
             fs.writeFileSync(`${__dirname}\\commands\\action-queue.json`, JSON.stringify(actionQueue));
+            actionQueue = null;
 
             Object.keys(playerData).forEach(async player => {
                 if (player != "data") {
@@ -475,6 +496,7 @@ async function GivePoints() {
             client.channels.cache.get(process.env.CHANNELID).send('<@&1190233509172891708>\nEveryone has received an action point!\n\n');
 
             votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
+            bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
             //const highest = [];
 
             if (playerData.data.amount_alive < playerData.data.max_alive && Object.keys(votes).length > 0) {
@@ -587,6 +609,7 @@ async function GivePoints() {
                 });
 
                 fs.writeFileSync(`${__dirname}\\commands\\votes.json`, JSON.stringify(newPoll));
+                votes = null;
 
                 var rows = [];
                 var tempArr = [];
@@ -616,6 +639,8 @@ async function GivePoints() {
                 });
             }
 
+            bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));
+
             var bountyResult = '';
             Object.keys(bounties).forEach(bounty => {
                 if (!bounties[bounty].active) {
@@ -641,6 +666,9 @@ async function GivePoints() {
             fs.writeFileSync(`${__dirname}\\commands\\bounty-points.json`, JSON.stringify(bountyPoints));
             fs.writeFileSync(`${__dirname}\\commands\\bounties.json`, JSON.stringify(bounties));
 
+            bountyPoints = null;
+            bounties = null;
+
             var playerArray = [];
             Object.keys(playerData).forEach(async player => {
                 playerArray.push(playerData[player]);
@@ -654,6 +682,8 @@ async function GivePoints() {
     else {
         pointsGiven = false;
     }
+
+    playerData = null;
 }
 
 setInterval(GivePoints, 600000);
