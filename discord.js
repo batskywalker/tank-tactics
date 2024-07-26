@@ -200,8 +200,8 @@ async function ExecuteCommand(interaction) {
             default:
                 tempData = await command.execute(interaction, playerData);
         }
-        /*playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
-        actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
+        playerData = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\player-data.json`, 'utf-8'));
+        /*actionQueue = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\action-queue.json`, 'utf-8'));
         votes = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\votes.json`, 'utf-8'));
         bountyPoints = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounty-points.json`, 'utf-8'));
         bounties = await JSON.parse(fs.readFileSync(`${__dirname}\\commands\\bounties.json`, 'utf-8'));*/
